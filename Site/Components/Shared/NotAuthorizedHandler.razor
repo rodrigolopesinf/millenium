@@ -1,0 +1,56 @@
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+
+@if (isUserAuthenticated)
+{
+    <div style="padding: 20px; text-align: center; margin-top: 50px;">
+        <h2 style="color: var(--primary-color);">Acesso Negado</h2>
+        <p style="color: var(--text-muted);">Você não possui permissão para acessar este recurso.</p>
+        <a href="/Blazor/Dashboard" class="btn btn-primary" style="margin-top: 15px; border-radius: var(--radius-md); font-family: 'Outfit', sans-serif;">Voltar ao Dashboard</a>
+    </div>
+}
+else if (RouteData != null && RouteData.PageType.IsDefined(typeof(AllowAnonymousAttribute), true))
+{
+    <RouteView RouteData="@RouteData" DefaultLayout="@typeof(Layout.MainLayout)" />
+}
+else
+{
+    <Site.Components.Shared.RedirectToLogin />
+}
+
+@code {
+    [Parameter]
+    public RouteData RouteData { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    private bool isUserAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            var user = authState.User;
+            isUserAuthenticated = user.Identity?.IsAuthenticated == true;
+            
+            Console.WriteLine($"[DEBUG-AUTH] Rota: {RouteData?.PageType?.Name}");
+            Console.WriteLine($"[DEBUG-AUTH] Autenticado: {isUserAuthenticated}");
+            if (isUserAuthenticated)
+            {
+                Console.WriteLine($"[DEBUG-AUTH] Nome: {user.Identity?.Name}");
+                Console.WriteLine($"[DEBUG-AUTH] Tipo Autenticação: {user.Identity?.AuthenticationType}");
+                foreach (var claim in user.Claims)
+                {
+                    Console.WriteLine($"[DEBUG-AUTH] Claim: {claim.Type} = {claim.Value}");
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("[DEBUG-AUTH] AuthenticationStateTask é nulo!");
+        }
+    }
+}

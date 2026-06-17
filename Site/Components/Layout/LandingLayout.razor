@@ -1,0 +1,120 @@
+@inherits LayoutComponentBase
+
+<HeadContent>
+    <link href="/css/site-institucional.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</HeadContent>
+
+<div class="landing-layout-wrapper">
+    <header class="main-header">
+        <div class="header-container">
+            <a href="/" class="logo-link">
+                <div class="logo-wrapper" style="display: flex; align-items: center; height: 45px;">
+                    <img src="/img/millenium-logo-novo.png" alt="Millenium Pesquisas Cadastrais" style="height: 170%; width: auto; display: block;" />
+                </div>
+            </a>
+            
+            <button class="mobile-menu-toggle" aria-label="Abrir menu de navegação" aria-expanded="false" id="menuToggle" @onclick="ToggleMobileMenu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            
+            <nav class="nav-menu @(mobileMenuOpen ? "active" : "")" id="navMenu">
+                <ul class="nav-list">
+                    <li><a href="/#inicio" class="nav-link" @onclick="CloseMobileMenu">Início</a></li>
+                    <li><a href="/#quem-somos" class="nav-link" @onclick="CloseMobileMenu">Quem Somos</a></li>
+                    <li><a href="/#servicos" class="nav-link" @onclick="CloseMobileMenu">Serviços</a></li>
+                    <li><a href="/#contato" class="nav-link" @onclick="CloseMobileMenu">Contato</a></li>
+                    <li>
+                        <a href="/Login" class="btn-login-header">Acesso ao Sistema</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+ 
+    <main class="main-content">
+        @Body
+    </main>
+ 
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-col brand-col">
+                    <div style="background-color: #ffffff; padding: 10px 15px; border-radius: 8px; display: inline-block; max-width: 220px; box-shadow: var(--shadow-sm);">
+                        <img src="/img/millenium-logo-novo.png" alt="Millenium Pesquisas Cadastrais" style="width: 100%; height: auto; display: block;" />
+                    </div>
+                    <p class="brand-desc" style="margin-top: 15px;">Soluções seguras e ágeis em inteligência cadastral e pesquisas físicas ou jurídicas. Atuando com excelência em todo o território nacional desde 1999.</p>
+                </div>
+                
+                <div class="footer-col links-col">
+                    <h3 class="footer-title">Links Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="/#inicio">Início</a></li>
+                        <li><a href="/#quem-somos">Quem Somos</a></li>
+                        <li><a href="/#servicos">Serviços</a></li>
+                        <li><a href="/#contato">Contato</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col services-col">
+                    <h3 class="footer-title">Principais Serviços</h3>
+                    <ul class="footer-links">
+                        <li><a href="/#servicos">Pesquisa Social</a></li>
+                        <li><a href="/#servicos">Pesquisa Financeira</a></li>
+                        <li><a href="/#servicos">Pesquisa de Veículos</a></li>
+                        <li><a href="/#servicos">Pesquisa de CNH</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col contact-col" id="fale-conosco">
+                    <h3 class="footer-title">Fale Conosco</h3>
+                    <ul class="footer-contact-info">
+                        <li>
+                            <i class="fa fa-phone"></i>
+                            <span>(11) 99999-9999</span>
+                        </li>
+                        <li>
+                            <i class="fa fa-envelope"></i>
+                            <span>contato@millenium.com.br</span>
+                        </li>
+                        <li>
+                            <i class="fa fa-map-marker"></i>
+                            <span>São Paulo - SP | Atendimento Nacional</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year Millenium Pesquisas. Todos os direitos reservados. Atuando desde 1999.</p>
+            </div>
+        </div>
+    </footer>
+ 
+    <!-- Botão de WhatsApp Flutuante -->
+    <a href="https://wa.me/5511999999999?text=Olá,%20gostaria%20de%20saber%20mais%20sobre%20as%20pesquisas%20cadastrais%20da%20Millenium." 
+       class="whatsapp-float" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       aria-label="Fale conosco no WhatsApp">
+        <svg viewBox="0 0 24 24" class="whatsapp-icon" fill="currentColor" style="width: 32px; height: 32px; color: #FFFFFF;">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.388 2.025 13.91 1 11.279 1 5.842 1 1.417 5.37 1.414 10.8c-.001 1.704.453 3.37 1.314 4.848l-.993 3.629 3.73-.974.004-.003c1.472.884 3.029 1.35 4.615 1.352zM17.8 14.5c-.29-.145-1.72-.85-1.986-.948-.268-.1-.462-.146-.657.147-.194.292-.75.948-.92 1.144-.168.195-.339.22-.628.074-1.258-.63-2.115-1.12-2.946-2.54-.22-.38-.075-.583.073-.732.133-.134.29-.341.438-.512.145-.17.195-.292.292-.487.097-.195.048-.365-.024-.512-.073-.146-.657-1.582-.9-2.17-.236-.57-.478-.492-.656-.501-.17-.008-.365-.01-.56-.01-.196 0-.512.073-.78.365-.268.293-1.022 1-1.022 2.438 0 1.439 1.047 2.83 1.193 3.024.145.195 2.062 3.149 4.996 4.413.698.3 1.243.48 1.667.615.702.223 1.342.192 1.848.117.564-.084 1.72-.702 1.962-1.38.243-.679.243-1.261.17-1.38-.072-.119-.268-.192-.559-.338z"/>
+        </svg>
+    </a>
+</div>
+
+@code {
+    private bool mobileMenuOpen = false;
+
+    private void ToggleMobileMenu()
+    {
+        mobileMenuOpen = !mobileMenuOpen;
+    }
+
+    private void CloseMobileMenu()
+    {
+        mobileMenuOpen = false;
+    }
+}

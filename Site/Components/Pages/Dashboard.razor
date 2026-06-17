@@ -1,0 +1,287 @@
+@page "/Blazor/Dashboard"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+@inject ISolicitacaoAppService SolicitacaoApp
+@inject IClienteAppService ClienteApp
+@inject IJSRuntime JS
+
+<PageTitle>Dashboard - Millenium Pesquisas</PageTitle>
+
+<div class="dashboard-container" style="padding: 0;">
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif;">Painel de Controle</h1>
+            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 13px;">Acompanhamento em tempo real das pesquisas e solicitações.</p>
+        </div>
+        <button class="btn btn-primary btn-atualizar" @onclick="AtualizarDados" disabled="@isLoading" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius-md); font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all 0.2s ease; font-size: 12px !important; height: 34px !important;">
+            @if (isLoading)
+            {
+                <i class="fa fa-refresh fa-spin"></i>
+                <span>Atualizando...</span>
+            }
+            else
+            {
+                <i class="fa fa-refresh"></i>
+                <span>Atualizar Estatísticas</span>
+            }
+        </button>
+    </div>
+
+    @if (isLoading && estatisticas == null)
+    {
+        <!-- Skeleton Loading inicial -->
+        <div class="row">
+            @for (int i = 0; i < 4; i++)
+            {
+                <div class="col-lg-3 col-xs-6">
+                    <div class="card-skeleton" style="height: 90px; background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 15px; margin-bottom: 16px; animation: pulse 1.5s infinite ease-in-out;">
+                        <div style="height: 12px; background-color: #e2e8f0; width: 60%; margin-bottom: 10px; border-radius: 3px;"></div>
+                        <div style="height: 24px; background-color: #e2e8f0; width: 40%; border-radius: 3px;"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (estatisticas != null)
+    {
+        <!-- Estatísticas Cards -->
+        <div class="row">
+            <!-- Total de Solicitações -->
+            <div class="col-lg-3 col-xs-6" style="margin-bottom: 16px;">
+                <div class="stat-card-custom">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Solicitações Totais</span>
+                        <div class="stat-card-icon-wrapper" style="width: 32px; height: 32px; background-color: rgba(100, 116, 139, 0.08); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #64748B;">
+                            <i class="fa fa-folder-open-o" style="font-size: 14px;"></i>
+                        </div>
+                    </div>
+                    <span class="stat-card-number">@estatisticas.TotalSolicitacoes</span>
+                </div>
+            </div>
+
+            <!-- Pendentes -->
+            <div class="col-lg-3 col-xs-6" style="margin-bottom: 16px;">
+                <div class="stat-card-custom">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Pendentes</span>
+                        <div class="stat-card-icon-wrapper" style="width: 32px; height: 32px; background-color: rgba(100, 116, 139, 0.08); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #64748B;">
+                            <i class="fa fa-clock-o" style="font-size: 14px;"></i>
+                        </div>
+                    </div>
+                    <span class="stat-card-number" style="color: #d97706;">@estatisticas.SolicitacoesPendentes</span>
+                </div>
+            </div>
+
+            <!-- Concluídas -->
+            <div class="col-lg-3 col-xs-6" style="margin-bottom: 16px;">
+                <div class="stat-card-custom">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Concluídas</span>
+                        <div class="stat-card-icon-wrapper" style="width: 32px; height: 32px; background-color: rgba(100, 116, 139, 0.08); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #64748B;">
+                            <i class="fa fa-check-circle-o" style="font-size: 14px;"></i>
+                        </div>
+                    </div>
+                    <span class="stat-card-number" style="color: #059669;">@estatisticas.SolicitacoesConcluidas</span>
+                </div>
+            </div>
+
+            <!-- Total Clientes -->
+            <div class="col-lg-3 col-xs-6" style="margin-bottom: 16px;">
+                <div class="stat-card-custom">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Clientes Ativos</span>
+                        <div class="stat-card-icon-wrapper" style="width: 32px; height: 32px; background-color: rgba(100, 116, 139, 0.08); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #64748B;">
+                            <i class="fa fa-users" style="font-size: 14px;"></i>
+                        </div>
+                    </div>
+                    <span class="stat-card-number" style="color: var(--primary-color);">@estatisticas.TotalClientes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela das últimas solicitações -->
+        <div class="row" style="margin-top: 8px;">
+            <div class="col-md-12">
+                <div class="grid-container" style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif;">Últimas Solicitações de Pesquisa</h3>
+                        <span style="font-size: 11px; font-weight: 600; color: var(--text-muted); background-color: var(--light-bg); padding: 2px 8px; border-radius: 12px; border: 1px solid var(--border-color);">Atualizado recentemente</span>
+                    </div>
+
+                    @if (isLoading)
+                    {
+                        <!-- Efeito de Loading na tabela -->
+                        <div style="padding: 24px; text-align: center; color: var(--text-muted);">
+                            <i class="fa fa-refresh fa-spin" style="font-size: 18px; margin-bottom: 6px; color: var(--primary-color);"></i>
+                            <p style="margin: 0; font-size: 12px;">Atualizando dados...</p>
+                        </div>
+                    }
+                    else if (ultimasSolicitacoes == null || !ultimasSolicitacoes.Any())
+                    {
+                        <div style="padding: 24px; text-align: center; color: var(--text-muted);">
+                            <i class="fa fa-exclamation-triangle" style="font-size: 18px; margin-bottom: 6px;"></i>
+                            <p style="margin: 0; font-size: 12px;">Nenhuma solicitação cadastrada no momento.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive" style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            <table class="table" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left;">Sequencial</th>
+                                        <th style="text-align: left;">Pesquisado</th>
+                                        <th style="text-align: left;">CPF</th>
+                                        <th style="text-align: left;">Data de Criação</th>
+                                        <th style="text-align: left;">Status</th>
+                                        <th style="text-align: center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var solicitacao in ultimasSolicitacoes)
+                                    {
+                                        <tr style="transition: background-color 0.2s ease;" class="table-row-hover">
+                                            <td style="font-weight: 600; color: var(--dark-bg);">@solicitacao.NumeroSequencial</td>
+                                            <td>@solicitacao.Nome</td>
+                                            <td style="color: var(--text-muted);">@solicitacao.Cpf</td>
+                                            <td style="color: var(--text-muted);">@solicitacao.DataHoraCriacao.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @if (string.IsNullOrEmpty(solicitacao.Resposta))
+                                                {
+                                                    <span class="status-badge-pending">
+                                                        Pendente
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status-badge-success">
+                                                        Concluído
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <a href="/Blazor/Solicitacao" class="btn btn-default" style="border-radius: 4px; font-weight: 600; font-size: 11px; padding: 4px 8px !important; transition: all 0.2s ease; height: auto !important; line-height: 1;">
+                                                    Visualizar/Editar
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .dashboard-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md) !important;
+    }
+    
+    .table-row-hover:hover {
+        background-color: #f8fafc;
+    }
+
+    .btn-atualizar:hover {
+        background-color: var(--primary-hover) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px var(--primary-glow);
+    }
+    
+    .btn-atualizar:active {
+        transform: translateY(0);
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: .5;
+        }
+    }
+</style>
+
+@code {
+    private bool isLoading = true;
+    private DashboardStats? estatisticas;
+    private List<Millenium.Domain.Entity.Solicitacao>? ultimasSolicitacoes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarDadosAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeLucide");
+        }
+    }
+
+    private async Task AtualizarDados()
+    {
+        isLoading = true;
+        StateHasChanged();
+        
+        // Simular um atraso para feedback visual da reatividade Blazor (loading)
+        await Task.Delay(600);
+        
+        await CarregarDadosAsync();
+    }
+
+    private async Task CarregarDadosAsync()
+    {
+        try
+        {
+            // Executamos no thread pool para evitar travar o thread da UI
+            await Task.Run(() =>
+            {
+                var solicitacoes = SolicitacaoApp.GetAll()?.Where(x => x.Excluido != true).ToList() ?? new List<Millenium.Domain.Entity.Solicitacao>();
+                var clientes = ClienteApp.GetAll()?.ToList() ?? new List<Millenium.Domain.Entity.Cliente>();
+
+                var total = solicitacoes.Count;
+                var pendentes = solicitacoes.Count(s => string.IsNullOrEmpty(s.Resposta));
+                var concluidas = total - pendentes;
+                var totalClientes = clientes.Count;
+
+                estatisticas = new DashboardStats
+                {
+                    TotalSolicitacoes = total,
+                    SolicitacoesPendentes = pendentes,
+                    SolicitacoesConcluidas = concluidas,
+                    TotalClientes = totalClientes
+                };
+
+                // Pega as últimas 5 solicitações ordenadas por ID decrescente
+                ultimasSolicitacoes = solicitacoes
+                    .OrderByDescending(s => s.IdSolicitacao)
+                    .Take(5)
+                    .ToList();
+            });
+        }
+        catch (Exception)
+        {
+            // Tratar o erro de forma amigável ou expor estatísticas zeradas
+            estatisticas = new DashboardStats();
+            ultimasSolicitacoes = new List<Millenium.Domain.Entity.Solicitacao>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class DashboardStats
+    {
+        public int TotalSolicitacoes { get; set; }
+        public int SolicitacoesPendentes { get; set; }
+        public int SolicitacoesConcluidas { get; set; }
+        public int TotalClientes { get; set; }
+    }
+}

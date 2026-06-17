@@ -1,0 +1,50 @@
+<div class="drawer-overlay @(IsOpen ? "active" : "")" @onclick="CloseDrawer" style="display: @(IsOpen ? "block" : "none"); position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); z-index: 1050; backdrop-filter: blur(4px); transition: all 0.3s ease;"></div>
+
+<div class="drawer-panel @(SizeClass) @(IsOpen ? "active" : "")" 
+     style="position: fixed; top: 0; right: 0; height: 100%; background: #ffffff; z-index: 1060; box-shadow: var(--shadow-lg); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); transform: translateX(@(IsOpen ? "0" : "100%")); width: @(WidthStyle); display: flex; flex-direction: column;">
+    
+    <!-- Header -->
+    <div class="drawer-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="drawer-title" style="margin: 0; font-size: 18px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif;">@Title</h3>
+        <button class="drawer-close-btn" @onclick="CloseDrawer" style="border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: color 0.2s;">
+            <i class="fa fa-times" style="font-size: 20px;"></i>
+        </button>
+    </div>
+    
+    <!-- Body -->
+    <div class="drawer-body" style="padding: 24px; flex-grow: 1; overflow-y: auto;">
+        @ChildContent
+    </div>
+    
+    <!-- Footer -->
+    @if (FooterContent != null)
+    {
+        <div class="drawer-footer" style="padding: 16px 24px; border-top: 1px solid var(--border-color); background-color: var(--light-bg); display: flex; justify-content: flex-end; gap: 12px;">
+            @FooterContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Size { get; set; } = "sm"; // sm, md, lg
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private string SizeClass => $"drawer-{Size}";
+
+    private string WidthStyle => Size switch
+    {
+        "lg" => "850px",
+        "md" => "650px",
+        _ => "450px"
+    };
+
+    private async Task CloseDrawer()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+}

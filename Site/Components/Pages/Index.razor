@@ -1,0 +1,508 @@
+@page "/"
+@layout Layout.LandingLayout
+@attribute [AllowAnonymous]
+
+<PageTitle>Inteligência Cadastral e Pesquisas Seguras - Millenium</PageTitle>
+
+<!-- Seção Hero (Início) -->
+<section class="hero-section" id="inicio">
+    <div class="container">
+        <div class="hero-grid">
+            <div class="hero-text-content">
+                <span class="section-tag">Solidez e Credibilidade</span>
+                <h1 class="hero-title">Soluções para atender a qualquer <span>necessidade</span> do seu negócio.</h1>
+                <p class="hero-subtitle">Tomadas de decisão mais seguras e ágeis com pesquisas cadastrais físicas e jurídicas estruturadas para o mercado corporativo.</p>
+                <div class="hero-actions">
+                    <a href="#contato" class="btn btn-primary">Fale Conosco</a>
+                    <a href="#servicos" class="btn btn-outline">Nossos Serviços</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-circle-accent"></div>
+                <div class="hero-card-demo">
+                    <div class="demo-header">
+                        <span class="demo-title">Análise Cadastral</span>
+                        <span class="demo-status">Concluída</span>
+                    </div>
+                    <div class="demo-row">
+                        <span class="demo-label">Solicitação:</span>
+                        <span class="demo-value">Pesquisa Social Simplificada</span>
+                    </div>
+                    <div class="demo-row">
+                        <span class="demo-label">Abrangência:</span>
+                        <span class="demo-value">Território Nacional</span>
+                    </div>
+                    <div class="demo-row">
+                        <span class="demo-label">Tempo de Resposta:</span>
+                        <span class="demo-value">Express (D+0)</span>
+                    </div>
+                    <div class="demo-row" style="margin-bottom: 0;">
+                        <span class="demo-label">Status do Laudo:</span>
+                        <span class="demo-value" style="color: var(--primary);">Disponível em PDF</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Diferenciais Rápidos -->
+<section class="features-strip">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-strip-card">
+                <div class="feature-strip-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <div>
+                    <h3 class="feature-strip-title">Segurança Máxima</h3>
+                    <p class="feature-strip-desc">Processos seguros e sigilo total em todas as análises realizadas.</p>
+                </div>
+            </div>
+            
+            <div class="feature-strip-card">
+                <div class="feature-strip-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <div>
+                    <h3 class="feature-strip-title">Respostas Ágeis</h3>
+                    <p class="feature-strip-desc">Prazos otimizados para atender a urgência dos seus negócios.</p>
+                </div>
+            </div>
+            
+            <div class="feature-strip-card">
+                <div class="feature-strip-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                <div>
+                    <h3 class="feature-strip-title">Qualidade & Precisão</h3>
+                    <p class="feature-strip-desc">Laudos detalhados conferidos por especialistas qualificados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Serviços em Destaque -->
+<section class="services-section" id="servicos">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Serviços Mais Buscados</span>
+            <h2 class="section-title">Análises estratégicas sob medida</h2>
+            <p class="section-subtitle">Conheça os principais segmentos de pesquisas cadastrais solicitadas pelos nossos parceiros de negócios.</p>
+        </div>
+        
+        <div class="services-grid">
+            <!-- Card 1: Pesquisa Social -->
+            <div class="service-card" @onclick='() => SelecionarAba("tab-social")' style="cursor: pointer;">
+                <div class="service-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <h3 class="service-card-title">Pesquisa Social</h3>
+                <p class="service-card-desc">Levantamento abrangente de antecedentes criminais em âmbito nacional e estadual.</p>
+                <a href="#catalogo" class="service-card-link">Saber mais &rarr;</a>
+            </div>
+
+            <!-- Card 2: Pesquisa Financeira -->
+            <div class="service-card" @onclick='() => SelecionarAba("tab-financeira")' style="cursor: pointer;">
+                <div class="service-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+                <h3 class="service-card-title">Pesquisa Financeira</h3>
+                <p class="service-card-desc">Consulta ao SPC-Serasa, cheques sem fundos, títulos protestados e restrições bancárias.</p>
+                <a href="#catalogo" class="service-card-link">Saber mais &rarr;</a>
+            </div>
+
+            <!-- Card 3: Pesquisa de Veículos -->
+            <div class="service-card" @onclick='() => SelecionarAba("tab-veiculos")' style="cursor: pointer;">
+                <div class="service-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                </div>
+                <h3 class="service-card-title">Pesquisa Veicular</h3>
+                <p class="service-card-desc">Histórico completo de roubo/furto, restrições financeiras e dados gerais do veículo.</p>
+                <a href="#catalogo" class="service-card-link">Saber mais &rarr;</a>
+            </div>
+
+            <!-- Card 4: Pesquisa de CNH -->
+            <div class="service-card" @onclick='() => SelecionarAba("tab-cnh")' style="cursor: pointer;">
+                <div class="service-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="13" y2="16"></line></svg>
+                </div>
+                <h3 class="service-card-title">Pesquisa de CNH</h3>
+                <p class="service-card-desc">Validação de dados cadastrais, categoria, pontuação e situação no DENATRAN.</p>
+                <a href="#catalogo" class="service-card-link">Saber mais &rarr;</a>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="#catalogo" class="btn btn-primary">Ver Todos os Serviços</a>
+        </div>
+    </div>
+</section>
+
+<!-- Seção A Empresa -->
+<section class="about-section" id="quem-somos">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-visual">
+                <span class="about-badge">Desde 1999</span>
+                <blockquote class="about-quote">"Segurança nas informações, agilidade nas respostas e qualidade integral nos serviços."</blockquote>
+                <p class="about-author">- Millenium, Líder em Inteligência Cadastral</p>
+                
+                <div class="about-diferenciais">
+                    <div class="dif-item"><span class="dif-dot"></span> Atuação Nacional</div>
+                    <div class="dif-item"><span class="dif-dot"></span> Equipe de Segurança e RH</div>
+                    <div class="dif-item"><span class="dif-dot"></span> Parcerias Duradouras</div>
+                    <div class="dif-item"><span class="dif-dot"></span> Foco em Satisfação</div>
+                </div>
+            </div>
+            
+            <div class="about-text-content">
+                <span class="section-tag">A Empresa</span>
+                <h2 class="section-title">Construindo parcerias sólidas</h2>
+                <p style="margin-bottom: 20px;">A Millenium atua desde 1999 em todo o Território Nacional, entregando informações cruciais para que as empresas protejam seus ativos e escolham as parcerias e profissionais corretos.</p>
+                <p style="margin-bottom: 30px; color: var(--gray-500);">Nossa equipe é formada por profissionais altamente capacitados oriundos diretamente das áreas de Segurança Corporativa e Recursos Humanos. Essa expertise única nos permite oferecer um atendimento consultivo de alto padrão focado na total satisfação e confiança de nossos clientes.</p>
+                <a href="#contato" class="btn btn-outline">Converse com Nossa Equipe</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Seção Catálogo Completo com Abas Reativas Blazor -->
+<section class="catalog-section" id="catalogo">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Catálogo Técnico</span>
+            <h2 class="section-title">Nossa linha completa de pesquisas</h2>
+            <p class="section-subtitle">Consulte o portfólio completo de análises disponíveis para demandas operacionais, societárias ou de contratação.</p>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn @(abaAtiva == "tab-social" ? "active" : "")" @onclick='() => SelecionarAba("tab-social")'>Pesquisa Social</button>
+                <button class="tab-btn @(abaAtiva == "tab-financeira" ? "active" : "")" @onclick='() => SelecionarAba("tab-financeira")'>Pesquisa Financeira</button>
+                <button class="tab-btn @(abaAtiva == "tab-profissional" ? "active" : "")" @onclick='() => SelecionarAba("tab-profissional")'>Pesquisa Profissional</button>
+                <button class="tab-btn @(abaAtiva == "tab-atestado" ? "active" : "")" @onclick='() => SelecionarAba("tab-atestado")'>Confirmação de Atestado</button>
+                <button class="tab-btn @(abaAtiva == "tab-civel" ? "active" : "")" @onclick='() => SelecionarAba("tab-civel")'>Pesquisa Cível</button>
+                <button class="tab-btn @(abaAtiva == "tab-cnh" ? "active" : "")" @onclick='() => SelecionarAba("tab-cnh")'>Pesquisa CNH</button>
+                <button class="tab-btn @(abaAtiva == "tab-veiculos" ? "active" : "")" @onclick='() => SelecionarAba("tab-veiculos")'>Pesquisa Veículos</button>
+                <button class="tab-btn @(abaAtiva == "tab-midia" ? "active" : "")" @onclick='() => SelecionarAba("tab-midia")'>Reputação de Mídia</button>
+            </div>
+
+            <!-- Tab 1: Pesquisa Social -->
+            <div class="tab-content @(abaAtiva == "tab-social" ? "active" : "")" id="tab-social">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Pesquisa Social</h3>
+                        <p>Levantamento pormenorizado de antecedentes criminais e registros judiciais associados a pessoas físicas nos âmbitos Estadual e Federal em todo o território brasileiro.</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Tribunais Federais</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Tribunais Estaduais</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Certidões Criminais</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Registros de Polícia</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Social / Compliance</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Admissões estratégicas, triagem de prestadores de serviços terceirizados, due diligence e análise de compliance corporativo.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Pesquisa Financeira -->
+            <div class="tab-content @(abaAtiva == "tab-financeira" ? "active" : "")" id="tab-financeira">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Pesquisa Financeira</h3>
+                        <p>Avaliação completa da saúde financeira e histórico creditício de pessoas físicas ou jurídicas junto aos principais órgãos de proteção ao crédito nacional.</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> SPC e Serasa</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Cheques sem Fundos</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Títulos Protestados</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Restrições Bancárias</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Análise de Risco</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Análise de crédito para novos clientes corporativos, due diligence de parceiros comerciais e validações pré-contratação societária.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Pesquisa Profissional -->
+            <div class="tab-content @(abaAtiva == "tab-profissional" ? "active" : "")" id="tab-profissional">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Pesquisa Profissional</h3>
+                        <p>Validação integral do histórico profissional declaratório de candidatos para vagas estratégicas e verificação junto aos departamentos de RH e gestores anteriores.</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Vínculos Empregatícios</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Motivo de Desligamento</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Feedback de Gestores</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Cargos e Datas</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Recursos Humanos</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Suporte a processos de recrutamento e seleção para cargos diretivos, gerenciais, financeiros ou de alta confiança.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Confirmação de Atestado -->
+            <div class="tab-content @(abaAtiva == "tab-atestado" ? "active" : "")" id="tab-atestado">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Confirmação de Atestado Médico</h3>
+                        <p>Checagem minuciosa de veracidade e emissão de atestados médicos apresentados, diretamente junto à unidade médica, hospital ou profissional emissor.</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Validação do Emissor</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Registro no CRM</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Data e Horário</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Confirmação de Visita</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Auditoria Interna</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Mitigação de fraudes trabalhistas, controle de absenteísmo corporativo recorrente e auditoria de recursos humanos.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Pesquisa Cível -->
+            <div class="tab-content @(abaAtiva == "tab-civel" ? "active" : "")" id="tab-civel">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Pesquisa Cível</h3>
+                        <p>Mapeamento judicial focado em processos de natureza cível instaurados contra a pessoa (física ou jurídica) em tribunais locais, estaduais e regionais.</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Ações de Cobrança</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Execuções Fiscais</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Disputas de Contratos</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Processos Administrativos</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Jurídico / Compliance</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Mapeamento de riscos judiciais passivos antes de fusões, aquisições, contratações de executivos ou assinaturas de grandes contratos.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 6: Pesquisa CNH -->
+            <div class="tab-content @(abaAtiva == "tab-cnh" ? "active" : "")" id="tab-cnh">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Pesquisa de CNH</h3>
+                        <p>Cruzamento de informações cadastrais da Carteira Nacional de Habilitação do condutor junto ao Departamento Nacional de Trânsito (DENATRAN).</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Validação de Categoria</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Situação da Habilitação</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Pontuação Acumulada</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Validade do Documento</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Frotas & Logística</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Contratação segura de motoristas de transportadoras, frota própria de representação e due diligence para seguradoras.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 7: Pesquisa Veículos -->
+            <div class="tab-content @(abaAtiva == "tab-veiculos" ? "active" : "")" id="tab-veiculos">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Pesquisa de Veículos</h3>
+                        <p>Checagem completa e validação de dados de automóveis, motocicletas e caminhões para mitigar riscos de aquisição ou fraude de ativos móveis.</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Histórico de Roubo/Furto</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Gravames e Alienações</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Validação de RENAVAM</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Dados Cadastrais (Marca/Modelo/Ano)</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Patrimonial</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Validação cadastral de ativos antes de aquisições de frota corporativa, aceitação de garantias em contratos ou liberação de apólices.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 8: Reputação de Mídia -->
+            <div class="tab-content @(abaAtiva == "tab-midia" ? "active" : "")" id="tab-midia">
+                <div class="tab-grid">
+                    <div class="tab-text-content">
+                        <h3>Pesquisa de Reputação de Mídia</h3>
+                        <p>Investigação e varredura minuciosa sobre menções públicas, reportagens e polêmicas associadas ao CPF ou CNPJ em portais de notícias e plataformas sociais.</p>
+                        <div class="tab-specs-list">
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Mídias Digitais</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Fontes de Notícias</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Redes Sociais</div>
+                            <div class="spec-item"><span class="spec-icon">&bull;</span> Histórico de Menções</div>
+                        </div>
+                    </div>
+                    <div class="tab-visual-box">
+                        <div class="tab-visual-item">
+                            <span class="visual-badge">Compliance / KYC</span>
+                            <p class="visual-item-title">Principais Aplicações</p>
+                            <p class="brand-desc" style="margin-top:0;">Prevenção a riscos de imagem e reputacionais na admissão de porta-vozes, presidentes, executivos e fornecedores críticos.</p>
+                            <div class="visual-item-line"></div>
+                            <a href="#contato" class="btn btn-outline" style="align-self: flex-start; padding: 8px 16px; font-size: 0.85rem;">Solicitar Proposta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Seção Contato Reativa -->
+<section class="contact-section" id="contato">
+    <div class="container">
+        <div class="contact-grid">
+            <div class="contact-info-panel">
+                <span class="section-tag">Fale Conosco</span>
+                <h2 class="contact-info-title">Pronto para aumentar a segurança do seu negócio?</h2>
+                <p style="margin-bottom: 24px; color: var(--gray-500);">Preencha o formulário e nossa equipe comercial retornará o contato com o portfólio completo de planos comerciais por faturamento de consumo.</p>
+                
+                <div class="contact-cards-container">
+                    <div class="contact-detail-card">
+                        <div class="contact-detail-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        </div>
+                        <div>
+                            <h4>Central Telefônica & WhatsApp</h4>
+                            <p>(11) 99999-9999</p>
+                        </div>
+                    </div>
+    
+                    <div class="contact-detail-card">
+                        <div class="contact-detail-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        </div>
+                        <div>
+                            <h4>E-mail de Contato</h4>
+                            <p>contato@millenium.com.br</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="contact-form-panel">
+                @if (exibirMensagemSucesso)
+                {
+                    <div class="alert alert-success" style="border-radius: var(--radius-md); margin-bottom: 20px; font-weight: 500;">
+                        Sua mensagem foi enviada com sucesso! Em breve nossa equipe entrará em contato.
+                    </div>
+                }
+                @if (exibirMensagemErro)
+                {
+                    <div class="alert alert-danger" style="border-radius: var(--radius-md); margin-bottom: 20px; font-weight: 500;">
+                        Por favor, preencha todos os campos do formulário.
+                    </div>
+                }
+    
+                <EditForm Model="contatoModel" OnValidSubmit="SubmeterContato">
+                    <DataAnnotationsValidator />
+                    
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="nome" class="form-label">Nome Completo</label>
+                            <input type="text" id="nome" @bind="contatoModel.Nome" class="form-control" placeholder="Seu nome" required style="border-radius: var(--radius-md); border-color: var(--border-color); height: 42px;" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="form-label">E-mail Corporativo</label>
+                            <input type="email" id="email" @bind="contatoModel.Email" class="form-control" placeholder="seu.nome@empresa.com" required style="border-radius: var(--radius-md); border-color: var(--border-color); height: 42px;" />
+                        </div>
+                    </div>
+    
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="assunto" class="form-label">Assunto de Interesse</label>
+                        <input type="text" id="assunto" @bind="contatoModel.Assunto" class="form-control" placeholder="Ex: Pesquisas para RH, Orçamento, etc." required style="border-radius: var(--radius-md); border-color: var(--border-color); height: 42px;" />
+                    </div>
+    
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="mensagem" class="form-label">Mensagem</label>
+                        <textarea id="mensagem" @bind="contatoModel.Mensagem" class="form-control" placeholder="Descreva brevemente a sua necessidade cadastral..." required style="border-radius: var(--radius-md); border-color: var(--border-color); height: 120px; resize: vertical;"></textarea>
+                    </div>
+    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px; height: 42px; border-radius: var(--radius-md); font-weight: 600;">Enviar Solicitação</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private string abaAtiva = "tab-social";
+    private ContatoForm contatoModel = new ContatoForm();
+    private bool exibirMensagemSucesso = false;
+    private bool exibirMensagemErro = false;
+
+    private void SelecionarAba(string tabId)
+    {
+        abaAtiva = tabId;
+    }
+
+    private void SubmeterContato()
+    {
+        if (string.IsNullOrWhiteSpace(contatoModel.Nome) || 
+            string.IsNullOrWhiteSpace(contatoModel.Email) || 
+            string.IsNullOrWhiteSpace(contatoModel.Assunto) || 
+            string.IsNullOrWhiteSpace(contatoModel.Mensagem))
+        {
+            exibirMensagemErro = true;
+            exibirMensagemSucesso = false;
+            return;
+        }
+
+        exibirMensagemSucesso = true;
+        exibirMensagemErro = false;
+        contatoModel = new ContatoForm(); // Limpa formulário
+    }
+
+    public class ContatoForm
+    {
+        public string Nome { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Assunto { get; set; } = "";
+        public string Mensagem { get; set; } = "";
+    }
+}

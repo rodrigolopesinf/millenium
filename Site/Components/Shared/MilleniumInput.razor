@@ -1,0 +1,64 @@
+@inherits Microsoft.AspNetCore.Components.Forms.InputBase<string>
+
+<div class="form-group @Class">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label for="@Id" style="font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; color: var(--dark-bg);">
+            @Label
+            @if (Required)
+            {
+                <span class="text-danger">*</span>
+            }
+        </label>
+    }
+    <div style="position: relative;">
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <i class="@Icon" style="position: absolute; left: 12px; top: 12px; color: var(--text-muted);"></i>
+        }
+        <input id="@Id"
+               type="@Type"
+               class="form-control @(HasValidationError ? "input-validation-error" : "")"
+               style="padding-left: @(!string.IsNullOrEmpty(Icon) ? "36px" : "12px"); border-radius: var(--radius-md); border-color: @(HasValidationError ? "#ef4444" : "var(--border-color)"); transition: all 0.2s;"
+               placeholder="@Placeholder"
+               value="@CurrentValue"
+               @oninput="OnInputChanged"
+               disabled="@Disabled"
+               maxlength="@Maxlength"
+               required="@Required"
+               @attributes="AdditionalAttributes" />
+    </div>
+    
+    @if (HasValidationError)
+    {
+        <div class="text-danger" style="font-size: 12px; margin-top: 4px; font-weight: 500;">
+            <ValidationMessage For="@ValueExpression" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Placeholder { get; set; } = "";
+    [Parameter] public string Type { get; set; } = "text";
+    [Parameter] public string Icon { get; set; } = "";
+    [Parameter] public string Class { get; set; } = "";
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public int Maxlength { get; set; } = 255;
+
+    private bool HasValidationError => EditContext != null && EditContext.GetValidationMessages(FieldIdentifier).Any();
+
+    private void OnInputChanged(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value?.ToString();
+    }
+
+    protected override bool TryParseValueFromString(string? value, out string result, out string? validationErrorMessage)
+    {
+        result = value ?? "";
+        validationErrorMessage = null;
+        return true;
+    }
+}

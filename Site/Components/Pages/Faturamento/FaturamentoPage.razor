@@ -1,0 +1,747 @@
+@page "/Blazor/Faturamento"
+@attribute [Authorize]
+@inject IFaturamentoAppService FaturamentoApp
+@inject IClienteAppService ClienteApp
+@inject ISolicitacaoAppService SolicitacaoApp
+@inject ITipoSolicitacaoAppService TipoSolicitacaoApp
+@inject IUsuarioAppService UsuarioApp
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JS
+@inject Millenium.Infra.Data.Contexto.ContextMillenium Contexto
+@using Millenium.Domain.Entity
+@using Microsoft.EntityFrameworkCore
+@using System.Text
+
+<PageTitle>Faturamento Mensal - Millenium</PageTitle>
+
+<div class="dashboard-container" style="padding: 10px;">
+    <!-- Cabeçalho da Tela -->
+    <div class="page-header-container" style="margin-bottom: 24px;">
+        <h3 style="margin: 0; font-size: 24px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif;">Faturamento Mensal</h3>
+        <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 14px;">Gerencie, consolide e exporte o fechamento mensal de doses consumidas pelos clientes.</p>
+    </div>
+
+    <!-- Filtros de Busca -->
+    <div class="search-toolbar-custom" style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+        <span class="toolbar-title" style="font-weight: 700; font-size: 15px; color: var(--dark-bg); display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-family: 'Outfit', sans-serif;">
+            <i class="fa fa-filter"></i> Parâmetros de Fechamento
+        </span>
+        
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Cliente</label>
+                <select class="form-control" @bind="filtroClienteId" style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                    <option value="0">TODOS OS CLIENTES</option>
+                    @foreach (var c in clientes)
+                    {
+                        <option value="@c.IdCliente">@c.CodigoCliente - @(c.Cnpj != null ? c.NomeFantasia : c.Nome)</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Mês</label>
+                <select class="form-control" @bind="filtroMes" style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Ano</label>
+                <input type="number" @bind="filtroAno" class="form-control" style="border-radius: var(--radius-md); border-color: var(--border-color);" min="2000" max="2100" />
+            </div>
+            <div class="form-group col-md-2" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
+                <button class="btn btn-primary btn-block" @onclick="GerarFaturamento" style="height: 38px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--radius-md); font-weight: 600;">
+                    <i class="fa fa-refresh"></i> Gerar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo do Faturamento -->
+    @if (carregando)
+    {
+        <div style="padding: 60px; text-align: center; color: var(--text-muted);">
+            <i class="fa fa-refresh fa-spin" style="font-size: 32px; margin-bottom: 16px; color: var(--primary-color);"></i>
+            <p style="font-weight: 600;">Calculando consumo e faturamento...</p>
+        </div>
+    }
+    else if (exibirDados)
+    {
+        <!-- Mensagem de consolidação global -->
+        @if (linhasFaturamento.All(l => l.Consolidado))
+        {
+            <div class="alert alert-success" style="border-radius: var(--radius-md); font-weight: 500; margin-bottom: 24px; border: none; background-color: rgba(16, 185, 129, 0.1); color: #059669; display: flex; align-items: center; gap: 12px;">
+                <i class="fa fa-check-circle" style="font-size: 18px;"></i>
+                <span>Este período já está consolidado e fechado no banco de dados para todos os registros listados.</span>
+            </div>
+        }
+        else if (linhasFaturamento.Any(l => l.Consolidado))
+        {
+            <div class="alert alert-warning" style="border-radius: var(--radius-md); font-weight: 500; margin-bottom: 24px; border: none; background-color: rgba(245, 158, 11, 0.1); color: #d97706; display: flex; align-items: center; gap: 12px;">
+                <i class="fa fa-exclamation-triangle" style="font-size: 18px;"></i>
+                <span>Alguns clientes selecionados já possuem consolidação neste período.</span>
+            </div>
+        }
+
+        <!-- Cards Estatísticos Globais / Resumo Reativo -->
+        <div class="row" style="margin-bottom: 24px;">
+            <div class="col-md-3">
+                <div class="info-box-modern" style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
+                    <div style="background-color: rgba(243, 112, 33, 0.1); color: var(--primary-color); border-radius: var(--radius-md); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Doses Simples</span>
+                        <h3 style="margin: 4px 0 0 0; font-size: 22px; font-weight: 800; color: var(--dark-bg);">@SomaDosesSimples</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="info-box-modern" style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
+                    <div style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: var(--radius-md); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        <i class="fa fa-files-o"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Doses Duplas</span>
+                        <h3 style="margin: 4px 0 0 0; font-size: 22px; font-weight: 800; color: var(--dark-bg);">@SomaDosesDuplas</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="info-box-modern" style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
+                    <div style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: var(--radius-md); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        <i class="fa fa-gift"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Cortesias</span>
+                        <h3 style="margin: 4px 0 0 0; font-size: 22px; font-weight: 800; color: var(--dark-bg);">@SomaCortesias</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="info-box-modern" style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
+                    <div style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: var(--radius-md); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                        <i class="fa fa-dollar"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Valor Total</span>
+                        <h3 style="margin: 4px 0 0 0; font-size: 22px; font-weight: 800; color: var(--dark-bg);">@SomaValorTotal.ToString("C")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (filtroClienteId > 0 && clienteSelecionadoRow != null)
+        {
+            <!-- VISUALIZAÇÃO DO CLIENTE ESPECÍFICO -->
+            <div class="row">
+                <!-- Painel Lateral de Parâmetros Reativos e Ações -->
+                <div class="col-md-4">
+                    <div style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px;">
+                        <h4 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif;">Precificação & Ajustes</h4>
+                        
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Preço por Dose (R$)</label>
+                            <input type="number" step="0.01" class="form-control" 
+                                   value="@clienteSelecionadoRow.Preco" 
+                                   @oninput="UpdatePrecoCliente"
+                                   disabled="@(clienteSelecionadoRow.Consolidado || isReadOnly)" 
+                                   style="border-radius: var(--radius-md); border-color: var(--border-color); font-weight: 600;" />
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Doses de Cortesia</label>
+                            <input type="number" class="form-control" 
+                                   value="@clienteSelecionadoRow.QuantidadeDosesCortesia" 
+                                   @oninput="UpdateCortesiaCliente"
+                                   disabled="@(clienteSelecionadoRow.Consolidado || isReadOnly)" 
+                                   style="border-radius: var(--radius-md); border-color: var(--border-color); font-weight: 600;" />
+                        </div>
+
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+                            @if (!clienteSelecionadoRow.ConsolidatedInDb && (nivelUsuario == 1 || nivelUsuario == 2))
+                            {
+                                <MilleniumButton Style="success" Icon="fa fa-check" Text="Consolidar Faturamento" IsLoading="consolidando" LoadingText="Consolidando..." OnClick="() => ConsolidarFaturamento(clienteSelecionadoRow)" StyleAttribute="border-radius: var(--radius-md); font-weight: 600; width: 100%;" />
+                            }
+                            <button class="btn btn-default" @onclick="ExportarParaCSV" style="border-radius: var(--radius-md); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; border-color: var(--border-color); width: 100%;">
+                                <i class="fa fa-file-excel-o"></i> Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhamento de Solicitações do Cliente no Período -->
+                <div class="col-md-8">
+                    <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 16px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-list" style="color: var(--primary-color);"></i> Demonstrativo Detalhado de Solicitações
+                    </h4>
+                    
+                    <MilleniumTable TItem="Solicitacao" Items="solicitacoesDoPeriodo" ColSpan="6" PageSize="10">
+                        <HeaderTemplate>
+                            <th style="width: 80px; padding: 12px 16px; font-weight: 600; color: var(--text-muted); font-size: 13px;">ID</th>
+                            <th style="font-weight: 600; color: var(--text-muted); font-size: 13px;">Data</th>
+                            <th style="font-weight: 600; color: var(--text-muted); font-size: 13px;">Sequencial</th>
+                            <th style="font-weight: 600; color: var(--text-muted); font-size: 13px;">Tipo de Solicitação</th>
+                            <th style="font-weight: 600; color: var(--text-muted); font-size: 13px;">Pesquisado</th>
+                            <th style="font-weight: 600; color: var(--text-muted); font-size: 13px;">CPF</th>
+                        </HeaderTemplate>
+                        <RowTemplate Context="sol">
+                            <td style="padding: 14px 16px; font-weight: 600; color: var(--primary-color);">@sol.IdSolicitacao</td>
+                            <td style="padding: 14px 16px;">@sol.DataHoraCriacao.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td style="padding: 14px 16px; font-weight: 500;">@sol.NumeroSequencial</td>
+                            <td style="padding: 14px 16px;">
+                                <span class="badge" style="background-color: @GetBadgeColor(sol.TipoSolicitacao?.Descricao); font-weight: 700;">
+                                    @(sol.TipoSolicitacao?.Descricao ?? "SIMPLES")
+                                </span>
+                            </td>
+                            <td style="padding: 14px 16px;">@sol.Nome</td>
+                            <td style="padding: 14px 16px;">@sol.Cpf</td>
+                        </RowTemplate>
+                    </MilleniumTable>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- VISUALIZAÇÃO GERAL (TODOS OS CLIENTES) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif;">Consumo Consolidado por Cliente</h4>
+                
+                <div style="display: flex; gap: 8px;">
+                    @if (linhasFaturamento.Any(l => !l.Consolidado) && (nivelUsuario == 1 || nivelUsuario == 2))
+                    {
+                        <MilleniumButton Style="success" Icon="fa fa-check-square" Text="Consolidar Todos Pendentes" IsLoading="consolidando" LoadingText="Consolidando todos..." OnClick="ConsolidarTodosPendentes" StyleAttribute="border-radius: var(--radius-md); font-weight: 600;" />
+                    }
+                    <button class="btn btn-default" @onclick="ExportarParaCSV" style="border-radius: var(--radius-md); font-weight: 600; display: flex; align-items: center; gap: 8px; border-color: var(--border-color);">
+                        <i class="fa fa-file-excel-o"></i> Exportar Demonstrativo
+                    </button>
+                </div>
+            </div>
+
+            <MilleniumTable TItem="FaturamentoRow" Items="linhasFaturamento" ColSpan="9" PageSize="10" OnRowClick="OnSelectClienteRow">
+                <HeaderTemplate>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px;">Código</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px;">Cliente</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-align: center;">Simples</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-align: center;">Duplas</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-align: center;">Testes</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-align: center;">Cortesias</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-align: right;">Preço Unit.</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-align: right;">Valor Total</th>
+                    <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-align: center;">Status</th>
+                </HeaderTemplate>
+                <RowTemplate Context="row">
+                    <td style="padding: 14px 16px; font-weight: 600; color: var(--primary-color);">@row.CodigoCliente</td>
+                    <td style="padding: 14px 16px; font-weight: 500;">@row.NomeCliente</td>
+                    <td style="padding: 14px 16px; text-align: center;">@row.QuantidadeDosesSimples</td>
+                    <td style="padding: 14px 16px; text-align: center;">@row.QuantidadeDosesDuplas</td>
+                    <td style="padding: 14px 16px; text-align: center;">@row.QuantidadeDosesTeste</td>
+                    <td style="padding: 14px 16px; text-align: center;">@row.QuantidadeDosesCortesia</td>
+                    <td style="padding: 14px 16px; text-align: right; font-weight: 600;">@row.Preco.ToString("C")</td>
+                    <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: var(--dark-bg);">@row.Total.ToString("C")</td>
+                    <td style="padding: 14px 16px; text-align: center;">
+                        @if (row.Consolidado)
+                        {
+                            <span style="display: inline-block; padding: 2px 10px; font-size: 11px; font-weight: 700; border-radius: 12px; background-color: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                <i class="fa fa-lock"></i> Consolidado
+                            </span>
+                        }
+                        else
+                        {
+                            <span style="display: inline-block; padding: 2px 10px; font-size: 11px; font-weight: 700; border-radius: 12px; background-color: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);">
+                                <i class="fa fa-pencil-square-o"></i> Aberto
+                            </span>
+                        }
+                    </td>
+                </RowTemplate>
+            </MilleniumTable>
+            <p style="margin-top: 8px; font-size: 13px; color: var(--text-muted); font-style: italic;">
+                💡 Dica: Clique sobre a linha de um cliente na tabela acima para detalhar as solicitações e editar preço/cortesia.
+            </p>
+        }
+    }
+</div>
+
+@code {
+    private bool carregando = true;
+    private bool consolidando = false;
+    private bool exibirDados = false;
+    private Usuario? usuarioLogado;
+    private int nivelUsuario = 0;
+    private bool isReadOnly => nivelUsuario == 3;
+
+    // Filtros
+    private int filtroClienteId = 0;
+    private int filtroMes = DateTime.Today.Month;
+    private int filtroAno = DateTime.Today.Year;
+
+    // Listas básicas
+    private List<Cliente> clientes = new();
+    private List<TipoSolicitacao> tiposSolicitacao = new();
+    
+    // Dados processados
+    private List<FaturamentoRow> linhasFaturamento = new();
+    private List<Solicitacao> solicitacoesDoPeriodo = new();
+    private FaturamentoRow? clienteSelecionadoRow;
+
+    // Métricas
+    private int SomaDosesSimples => linhasFaturamento.Sum(l => l.QuantidadeDosesSimples);
+    private int SomaDosesDuplas => linhasFaturamento.Sum(l => l.QuantidadeDosesDuplas);
+    private int SomaCortesias => linhasFaturamento.Sum(l => l.QuantidadeDosesCortesia);
+    private decimal SomaValorTotal => linhasFaturamento.Sum(l => l.Total);
+
+    protected override async Task OnInitializedAsync()
+    {
+        carregando = true;
+        try
+        {
+            // Obter usuário logado para aplicar permissões
+            var userLogin = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(userLogin))
+            {
+                usuarioLogado = UsuarioApp.ObterUsuarioLogin(userLogin);
+                nivelUsuario = usuarioLogado?.IdNivel ?? 0;
+                
+                // Se for cliente (nível 3), limita apenas para o cliente dele
+                if (nivelUsuario == 3 && usuarioLogado != null)
+                {
+                    filtroClienteId = usuarioLogado.IdCliente;
+                }
+            }
+
+            await Task.Run(() =>
+            {
+                if (nivelUsuario == 3 && usuarioLogado != null)
+                {
+                    var c = ClienteApp.GetById(usuarioLogado.IdCliente);
+                    if (c != null) clientes = new List<Cliente> { c };
+                }
+                else
+                {
+                    clientes = ClienteApp.ObterClientesAtivos()?.OrderBy(c => c.Nome).ToList() ?? new();
+                }
+                tiposSolicitacao = TipoSolicitacaoApp.GetAll()?.ToList() ?? new();
+            });
+        }
+        catch (Exception)
+        {
+            // Tratar silenciosamente
+        }
+        finally
+        {
+            carregando = false;
+        }
+    }
+
+    private async Task GerarFaturamento()
+    {
+        carregando = true;
+        exibirDados = false;
+        clienteSelecionadoRow = null;
+        linhasFaturamento.Clear();
+        solicitacoesDoPeriodo.Clear();
+
+        try
+        {
+            var dataInicio = new DateTime(filtroAno, filtroMes, 1, 0, 0, 0);
+            var dataFim = new DateTime(filtroAno, filtroMes, DateTime.DaysInMonth(filtroAno, filtroMes), 23, 59, 59);
+            var mesString = $"{filtroMes:D2}/{filtroAno}";
+
+            // 1. Carregar solicitações ativas do período no banco
+            var solicitacoesRaw = await Contexto.Solicitacao
+                .Where(s => s.Excluido != true && s.DataHoraCriacao >= dataInicio && s.DataHoraCriacao <= dataFim)
+                .ToListAsync();
+
+            // 2. Carregar consolidados no banco para o mês/ano
+            var consolidados = await Contexto.FaturadoMes
+                .Include(f => f.Faturamento)
+                .Where(f => f.Mes == mesString)
+                .ToListAsync();
+
+            // Sincroniza o tipo de solicitação na memória
+            foreach (var sol in solicitacoesRaw)
+            {
+                sol.TipoSolicitacao = tiposSolicitacao.FirstOrDefault(t => t.IdTipoSolicitacao == sol.IdTipoSolicitacao) ?? new TipoSolicitacao();
+            }
+
+            // Clientes a serem processados
+            var clientesParaProcessar = new List<Cliente>();
+            if (filtroClienteId > 0)
+            {
+                var c = clientes.FirstOrDefault(x => x.IdCliente == filtroClienteId);
+                if (c != null) clientesParaProcessar.Add(c);
+            }
+            else
+            {
+                clientesParaProcessar = clientes;
+            }
+
+            foreach (var cliente in clientesParaProcessar)
+            {
+                var solicitacoesCliente = solicitacoesRaw.Where(s => s.IdCliente == cliente.IdCliente).ToList();
+                var consolidadoExistente = consolidados.FirstOrDefault(c => c.IdCliente == cliente.IdCliente);
+
+                if (consolidadoExistente != null)
+                {
+                    // Faturamento já consolidado no banco
+                    var f = consolidadoExistente.Faturamento;
+                    if (f != null && f.Excluido != true)
+                    {
+                        var row = new FaturamentoRow
+                        {
+                            IdCliente = cliente.IdCliente,
+                            NomeCliente = cliente.NomeFantasia ?? cliente.Nome ?? cliente.RazaoSocial ?? "CLIENTE SEM NOME",
+                            CodigoCliente = cliente.CodigoCliente ?? "N/D",
+                            QuantidadeDosesSimples = f.QuantidadeDosesSimples,
+                            QuantidadeDosesDuplas = f.QuantidadeDosesDuplas,
+                            QuantidadeDosesTeste = f.QuantidadeDosesTeste,
+                            QuantidadeDosesCortesia = f.QuantidadeDosesCortesia,
+                            Preco = f.Preco,
+                            Total = f.Total,
+                            Consolidado = true,
+                            ConsolidatedInDb = true,
+                            IdFaturamentoExistente = f.IdFaturamento
+                        };
+                        linhasFaturamento.Add(row);
+
+                        if (filtroClienteId > 0)
+                        {
+                            solicitacoesDoPeriodo = solicitacoesCliente;
+                            clienteSelecionadoRow = row;
+                        }
+                    }
+                }
+                else
+                {
+                    // Sem faturamento consolidado anterior - calcula em tempo real
+                    int simples = 0;
+                    int duplas = 0;
+                    int testes = 0;
+
+                    foreach (var s in solicitacoesCliente)
+                    {
+                        var desc = s.TipoSolicitacao?.Descricao?.ToUpper() ?? "";
+                        if (desc.Contains("DUPLA"))
+                        {
+                            duplas++;
+                        }
+                        else if (desc.Contains("TESTE"))
+                        {
+                            testes++;
+                        }
+                        else
+                        {
+                            simples++;
+                        }
+                    }
+
+                    // Se for "TODOS OS CLIENTES" e o cliente não possui consumo, pula para não encher a grid
+                    if (filtroClienteId == 0 && simples == 0 && duplas == 0 && testes == 0)
+                    {
+                        continue;
+                    }
+
+                    var precoPadrao = 50.00m;
+                    var totalDosesCobrar = simples + (duplas * 2);
+                    var dosesLiquidas = Math.Max(0, totalDosesCobrar - 0); // Cortesia padrão = 0
+                    var valorTotal = dosesLiquidas * precoPadrao;
+
+                    var row = new FaturamentoRow
+                    {
+                        IdCliente = cliente.IdCliente,
+                        NomeCliente = cliente.NomeFantasia ?? cliente.Nome ?? cliente.RazaoSocial ?? "CLIENTE SEM NOME",
+                        CodigoCliente = cliente.CodigoCliente ?? "N/D",
+                        QuantidadeDosesSimples = simples,
+                        QuantidadeDosesDuplas = duplas,
+                        QuantidadeDosesTeste = testes,
+                        QuantidadeDosesCortesia = 0,
+                        Preco = precoPadrao,
+                        Total = valorTotal,
+                        Consolidado = false,
+                        ConsolidatedInDb = false
+                    };
+                    linhasFaturamento.Add(row);
+
+                    if (filtroClienteId > 0)
+                    {
+                        solicitacoesDoPeriodo = solicitacoesCliente;
+                        clienteSelecionadoRow = row;
+                    }
+                }
+            }
+
+            exibirDados = true;
+        }
+        catch (Exception)
+        {
+            // Tratar de forma amigável
+        }
+        finally
+        {
+            carregando = false;
+        }
+    }
+
+    private void UpdatePrecoCliente(ChangeEventArgs e)
+    {
+        if (clienteSelecionadoRow == null || clienteSelecionadoRow.Consolidado) return;
+
+        if (decimal.TryParse(e.Value?.ToString(), out decimal preco))
+        {
+            clienteSelecionadoRow.Preco = preco;
+            CalcularTotalRow(clienteSelecionadoRow);
+        }
+    }
+
+    private void UpdateCortesiaCliente(ChangeEventArgs e)
+    {
+        if (clienteSelecionadoRow == null || clienteSelecionadoRow.Consolidado) return;
+
+        if (int.TryParse(e.Value?.ToString(), out int cortesia))
+        {
+            clienteSelecionadoRow.QuantidadeDosesCortesia = cortesia;
+            CalcularTotalRow(clienteSelecionadoRow);
+        }
+    }
+
+    private void CalcularTotalRow(FaturamentoRow row)
+    {
+        var totalDosesCobrar = row.QuantidadeDosesSimples + (row.QuantidadeDosesDuplas * 2);
+        var dosesLiquidas = Math.Max(0, totalDosesCobrar - row.QuantidadeDosesCortesia);
+        row.Total = dosesLiquidas * row.Preco;
+    }
+
+    private void OnSelectClienteRow(FaturamentoRow row)
+    {
+        filtroClienteId = row.IdCliente;
+        _ = GerarFaturamento();
+    }
+
+    private async Task ConsolidarFaturamento(FaturamentoRow row)
+    {
+        if (consolidando || row.Consolidado || row.ConsolidatedInDb) return;
+
+        bool confirmar = await JS.InvokeAsync<bool>("confirm", $"Confirma a consolidação do faturamento de '{row.NomeCliente}' para o mês {filtroMes:D2}/{filtroAno} no valor de {row.Total:C}?");
+        if (!confirmar) return;
+
+        consolidando = true;
+        try
+        {
+            using var transaction = await Contexto.Database.BeginTransactionAsync();
+            try
+            {
+                var fat = new Faturamento
+                {
+                    IdCliente = row.IdCliente,
+                    QuantidadeDosesSimples = row.QuantidadeDosesSimples,
+                    QuantidadeDosesDuplas = row.QuantidadeDosesDuplas,
+                    QuantidadeDosesTeste = row.QuantidadeDosesTeste,
+                    QuantidadeDosesCortesia = row.QuantidadeDosesCortesia,
+                    Preco = row.Preco,
+                    Total = row.Total,
+                    IdUsuarioCriacao = usuarioLogado?.IdUsuario ?? 1,
+                    DataHoraCriacao = DateTime.Now,
+                    Excluido = false
+                };
+
+                Contexto.Faturamento.Add(fat);
+                await Contexto.SaveChangesAsync();
+
+                var fMes = new FaturadoMes
+                {
+                    IdCliente = row.IdCliente,
+                    Mes = $"{filtroMes:D2}/{filtroAno}",
+                    IdFaturamento = fat.IdFaturamento
+                };
+
+                Contexto.FaturadoMes.Add(fMes);
+                await Contexto.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+                
+                row.Consolidado = true;
+                row.ConsolidatedInDb = true;
+                row.IdFaturamentoExistente = fat.IdFaturamento;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+            await JS.InvokeVoidAsync("alert", "Faturamento consolidado com sucesso!");
+            await GerarFaturamento();
+        }
+        catch (Exception)
+        {
+            await JS.InvokeVoidAsync("alert", "Ocorreu um erro ao salvar a consolidação no banco de dados.");
+        }
+        finally
+        {
+            consolidando = false;
+        }
+    }
+
+    private async Task ConsolidarTodosPendentes()
+    {
+        if (consolidando) return;
+
+        var pendentes = linhasFaturamento.Where(l => !l.Consolidado).ToList();
+        if (!pendentes.Any()) return;
+
+        bool confirmar = await JS.InvokeAsync<bool>("confirm", $"Deseja consolidar o faturamento de todos os {pendentes.Count} clientes pendentes para o mês {filtroMes:D2}/{filtroAno}?");
+        if (!confirmar) return;
+
+        consolidando = true;
+        try
+        {
+            using var transaction = await Contexto.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var row in pendentes)
+                {
+                    var fat = new Faturamento
+                    {
+                        IdCliente = row.IdCliente,
+                        QuantidadeDosesSimples = row.QuantidadeDosesSimples,
+                        QuantidadeDosesDuplas = row.QuantidadeDosesDuplas,
+                        QuantidadeDosesTeste = row.QuantidadeDosesTeste,
+                        QuantidadeDosesCortesia = row.QuantidadeDosesCortesia,
+                        Preco = row.Preco,
+                        Total = row.Total,
+                        IdUsuarioCriacao = usuarioLogado?.IdUsuario ?? 1,
+                        DataHoraCriacao = DateTime.Now,
+                        Excluido = false
+                    };
+
+                    Contexto.Faturamento.Add(fat);
+                    await Contexto.SaveChangesAsync();
+
+                    var fMes = new FaturadoMes
+                    {
+                        IdCliente = row.IdCliente,
+                        Mes = $"{filtroMes:D2}/{filtroAno}",
+                        IdFaturamento = fat.IdFaturamento
+                    };
+
+                    Contexto.FaturadoMes.Add(fMes);
+                    await Contexto.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+            await JS.InvokeVoidAsync("alert", "Todos os faturamentos pendentes foram consolidados!");
+            await GerarFaturamento();
+        }
+        catch (Exception)
+        {
+            await JS.InvokeVoidAsync("alert", "Ocorreu um erro ao processar a consolidação em lote.");
+        }
+        finally
+        {
+            consolidando = false;
+        }
+    }
+
+    private async Task ExportarParaCSV()
+    {
+        try
+        {
+            var sb = new StringBuilder();
+            var filename = "";
+
+            if (filtroClienteId > 0 && clienteSelecionadoRow != null)
+            {
+                filename = $"Demonstrativo_{clienteSelecionadoRow.CodigoCliente}_{filtroMes:D2}_{filtroAno}.csv";
+                
+                // Cabeçalho da exportação individual
+                sb.AppendLine($"DEMONSTRATIVO DE CONSUMO - {clienteSelecionadoRow.NomeCliente.ToUpper()} ({clienteSelecionadoRow.CodigoCliente})");
+                sb.AppendLine($"PERÍODO DE FATURAMENTO: {filtroMes:D2}/{filtroAno}");
+                sb.AppendLine($"Status: {(clienteSelecionadoRow.Consolidado ? "CONSOLIDADO" : "PENDENTE")}");
+                sb.AppendLine($"Doses Simples:;{clienteSelecionadoRow.QuantidadeDosesSimples}");
+                sb.AppendLine($"Doses Duplas:;{clienteSelecionadoRow.QuantidadeDosesDuplas}");
+                sb.AppendLine($"Doses Teste:;{clienteSelecionadoRow.QuantidadeDosesTeste}");
+                sb.AppendLine($"Cortesias:;{clienteSelecionadoRow.QuantidadeDosesCortesia}");
+                sb.AppendLine($"Preço Unitário:;{clienteSelecionadoRow.Preco:F2}");
+                sb.AppendLine($"Valor Total:;{clienteSelecionadoRow.Total:F2}");
+                sb.AppendLine();
+
+                // Listagem de solicitações detalhadas
+                sb.AppendLine("ID da Solicitação;Data Criação;Número Sequencial;Tipo de Serviço;Pesquisado;CPF");
+                foreach (var s in solicitacoesDoPeriodo)
+                {
+                    sb.AppendLine($"{s.IdSolicitacao};{s.DataHoraCriacao:dd/MM/yyyy HH:mm};{s.NumeroSequencial};{s.TipoSolicitacao?.Descricao};{s.Nome};{s.Cpf}");
+                }
+            }
+            else
+            {
+                filename = $"Faturamento_Mensal_{filtroMes:D2}_{filtroAno}.csv";
+                
+                // Cabeçalho da exportação consolidada global
+                sb.AppendLine($"FECHAMENTO CONSOLIDADO DE FATURAMENTO - {filtroMes:D2}/{filtroAno}");
+                sb.AppendLine($"Gerado em:;{DateTime.Now:dd/MM/yyyy HH:mm}");
+                sb.AppendLine();
+                sb.AppendLine("Código;Cliente;Simples;Duplas;Testes;Cortesias;Preço Unitário (R$);Total (R$);Status");
+                
+                foreach (var row in linhasFaturamento)
+                {
+                    var statusStr = row.Consolidado ? "CONSOLIDADO" : "PENDENTE";
+                    sb.AppendLine($"{row.CodigoCliente};{row.NomeCliente};{row.QuantidadeDosesSimples};{row.QuantidadeDosesDuplas};{row.QuantidadeDosesTeste};{row.QuantidadeDosesCortesia};{row.Preco:F2};{row.Total:F2};{statusStr}");
+                }
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var bom = new byte[] { 0xEF, 0xBB, 0xBF }; // UTF-8 BOM
+            var finalBytes = new byte[bom.Length + bytes.Length];
+            Buffer.BlockCopy(bom, 0, finalBytes, 0, bom.Length);
+            Buffer.BlockCopy(bytes, 0, finalBytes, bom.Length, bytes.Length);
+
+            var base64 = Convert.ToBase64String(finalBytes);
+            await JS.InvokeVoidAsync("window.downloadFile", filename, "text/csv;charset=utf-8", base64);
+        }
+        catch (Exception)
+        {
+            await JS.InvokeVoidAsync("alert", "Falha ao gerar o arquivo CSV de faturamento.");
+        }
+    }
+
+    private string GetBadgeColor(string? descricao)
+    {
+        var d = descricao?.ToUpper() ?? "";
+        if (d.Contains("DUPLA")) return "#3b82f6";
+        if (d.Contains("TESTE")) return "#ef4444";
+        return "#f37021";
+    }
+
+    public class FaturamentoRow
+    {
+        public int IdCliente { get; set; }
+        public string NomeCliente { get; set; } = "";
+        public string CodigoCliente { get; set; } = "";
+        public int QuantidadeDosesSimples { get; set; }
+        public int QuantidadeDosesDuplas { get; set; }
+        public int QuantidadeDosesTeste { get; set; }
+        public int QuantidadeDosesCortesia { get; set; }
+        public decimal Preco { get; set; }
+        public decimal Total { get; set; }
+        public bool Consolidado { get; set; }
+        public bool ConsolidatedInDb { get; set; }
+        public int? IdFaturamentoExistente { get; set; }
+    }
+}

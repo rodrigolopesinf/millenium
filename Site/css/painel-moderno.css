@@ -1,0 +1,1167 @@
+/* -------------------------------------------------------------
+   MILLENIUM - SISTEMA ADMINISTRATIVO (PAINEL MODERNO)
+   CSS de Sobrescrita para AdminLTE e Bootstrap 3 Legados
+   ------------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary-color: #F37021;
+    --primary-hover: #D85C16;
+    --primary-glow: rgba(243, 112, 33, 0.15);
+    --dark-bg: #1E293B;
+    --light-bg: #F8FAFC;
+    --border-color: #E2E8F0;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --radius-md: 6px; /* Ajustado de 8px para sutileza */
+    --radius-lg: 8px;  /* Ajustado de 12px para visual corporativo compacto */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.04), 0 2px 4px -1px rgba(0,0,0,0.02);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
+}
+
+/* Escala de Fontes Base e Reset de HTML */
+html {
+    font-size: 14px !important; /* Reduzido de 16px para maior densidade visual */
+}
+
+/* Correção de Fundo Escuro Global (Evita vazamento de cor na parte inferior) */
+html,
+body,
+body.skin-blue,
+body.skin-blue .wrapper,
+body.skin-blue .wrapper .right-side {
+    background-color: var(--light-bg) !important;
+    background: var(--light-bg) !important;
+    min-height: 100vh !important;
+}
+
+/* Reset Visual e Fontes no Painel */
+body.premium-ui,
+body.premium-ui input,
+body.premium-ui select,
+body.premium-ui textarea,
+body.premium-ui button {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--text-main) !important;
+    font-size: 13px !important; /* Reduzido de 15px para o visual premium e limpo */
+}
+
+body.premium-ui h1, 
+body.premium-ui h2, 
+body.premium-ui h3, 
+body.premium-ui h4, 
+body.premium-ui h5, 
+body.premium-ui h6,
+body.premium-ui .page-header {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    color: var(--dark-bg) !important;
+    border-bottom: none !important;
+}
+
+/* Sobrescrita da Skin Blue do AdminLTE */
+.skin-blue .header .navbar {
+    background-color: #FFFFFF !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+body.skin-blue .header .logo {
+    background-color: #FFFFFF !important;
+    color: var(--primary-color) !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 800 !important;
+    letter-spacing: 1.5px !important;
+    font-size: 1.3rem !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+body.skin-blue .header .logo:hover {
+    background-color: var(--light-bg) !important;
+}
+
+.skin-blue .header .navbar .sidebar-toggle .icon-bar {
+    background-color: var(--dark-bg) !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li > a {
+    color: var(--dark-bg) !important;
+    font-weight: 600 !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li > a:hover {
+    color: var(--primary-color) !important;
+    background-color: var(--light-bg) !important;
+}
+
+/* Menu de Usuário no Topo */
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu > a {
+    color: var(--dark-bg) !important;
+    font-weight: 600 !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 15px 20px !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu > a:hover,
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu.open > a {
+    background-color: var(--light-bg) !important;
+    color: var(--primary-color) !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu .dropdown-menu {
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border-radius: var(--radius-md) !important;
+    overflow: hidden;
+    padding: 0 !important;
+    width: 220px !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu .dropdown-menu .user-header {
+    background-color: var(--light-bg) !important;
+    height: auto !important;
+    padding: 20px !important;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu .dropdown-menu .user-header p {
+    color: var(--dark-bg) !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    font-size: 0.95rem !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu .dropdown-menu .user-footer {
+    background-color: #FFFFFF !important;
+    padding: 12px 20px !important;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu .dropdown-menu .user-footer a {
+    background-color: var(--primary-color) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 6px 16px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+.skin-blue .header .navbar .navbar-right .nav > li.user-menu .dropdown-menu .user-footer a:hover {
+    background-color: var(--primary-hover) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Sobrescrita definitiva da Sidebar do AdminLTE para Estilo Claro */
+body.skin-blue .left-side,
+body.skin-blue .sidebar-offcanvas,
+body.skin-blue .sidebar {
+    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
+    border-right: 1px solid var(--border-color) !important;
+}
+
+body.skin-blue .sidebar .user-panel {
+    background-color: var(--light-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 18px 16px !important;
+}
+
+body.skin-blue .sidebar .user-panel .info p {
+    color: var(--dark-bg) !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+}
+
+body.skin-blue .sidebar .user-panel .info a {
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+}
+
+/* Sidebar Menu Moderno */
+body.skin-blue .sidebar-menu {
+    background: #FFFFFF !important;
+    padding: 16px 0 !important;
+}
+
+body.skin-blue .sidebar-menu > li {
+    margin-bottom: 4px !important;
+}
+
+body.skin-blue .sidebar-menu > li > a {
+    color: #475569 !important; /* Slate 600 */
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 0.92rem !important; /* Reduzido de 1.05rem */
+    padding: 10px 16px !important; /* Reduzido de 14px 20px */
+    border-left: 4px solid transparent !important;
+    background: transparent !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+body.skin-blue .sidebar-menu > li:hover > a,
+body.skin-blue .sidebar-menu > li.active > a {
+    color: var(--primary-color) !important;
+    background-color: rgba(243, 112, 33, 0.05) !important; /* Laranja sutil */
+    border-left-color: var(--primary-color) !important;
+    font-weight: 700 !important;
+}
+
+/* Submenus na Sidebar Clara */
+body.skin-blue .sidebar-menu .treeview-menu {
+    background-color: #FFFFFF !important;
+    padding-left: 15px !important;
+    border-left: 1px solid var(--border-color) !important;
+    margin-left: 20px !important;
+    margin-top: 4px !important;
+    margin-bottom: 8px !important;
+}
+
+body.skin-blue .sidebar-menu .treeview-menu > li > a {
+    color: #64748B !important; /* Slate 500 */
+    font-size: 0.85rem !important; /* Reduzido de 0.95rem */
+    padding: 6px 12px !important; /* Reduzido de 8px 12px */
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    border-radius: var(--radius-sm) !important;
+    background: transparent !important;
+}
+
+body.skin-blue .sidebar-menu .treeview-menu > li > a:hover,
+body.skin-blue .sidebar-menu .treeview-menu > li.active > a {
+    color: var(--primary-color) !important;
+    background-color: rgba(243, 112, 33, 0.05) !important;
+}
+
+
+/* Sobrescritas de layout adicionais */
+
+
+/* Área de Conteúdo */
+.right-side {
+    background-color: var(--light-bg) !important;
+}
+
+.content {
+    padding: 24px !important; /* Reduzido de 30px */
+}
+
+/* Título de Página Minimalista */
+.page-header-container {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-header-container h3 {
+    margin: 0 0 4px 0 !important;
+    font-size: 1.4rem !important; /* Reduzido de 1.75rem */
+}
+
+.page-header-container p {
+    color: var(--text-muted);
+    font-size: 0.82rem; /* Reduzido de 0.9rem */
+    margin: 0;
+}
+
+/* Remover Panels Rígidos e Substituir por Cards Minimalistas */
+.panel-group,
+.panel-primary,
+.panel {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    margin-bottom: 24px !important;
+}
+
+.panel-heading {
+    display: none !important; /* Esconder os headers de sanfona clássicos */
+}
+
+.panel-body {
+    background-color: #FFFFFF !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 24px !important;
+    box-shadow: var(--shadow-sm) !important;
+    margin-bottom: 24px !important;
+}
+
+/* Toolbar Integrada de Busca no Topo */
+.search-toolbar-custom {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.toolbar-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.toolbar-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark-bg);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Inputs e Seleções Inteligentes */
+.form-group label {
+    font-weight: 600 !important;
+    font-size: 11px !important; /* Reduzido de 0.9rem */
+    color: var(--text-muted) !important;
+    margin-bottom: 6px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.form-control {
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 6px 12px !important; /* Reduzido padding */
+    height: 36px !important;      /* Altura compacta */
+    box-shadow: none !important;
+    transition: all 0.2s ease-in-out !important;
+    background-color: #FFFFFF !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+/* Customização de Botões */
+.btn {
+    border-radius: var(--radius-md) !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important; /* Reduzido de 10px 20px */
+    transition: all 0.2s ease !important;
+    font-size: 13px !important;   /* Ajustado para 13px */
+}
+
+.btn-primary,
+.btn-default[type="submit"][value="Buscar"] {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-primary:hover,
+.btn-default[type="submit"][value="Buscar"]:hover {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px var(--primary-glow) !important;
+}
+
+.btn-default {
+    background-color: #FFFFFF !important;
+    border-color: var(--border-color) !important;
+    color: var(--slate-800) !important;
+}
+
+.btn-default:hover {
+    background-color: var(--light-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Tabela de Dados Limpa */
+.table-responsive {
+    border: none !important;
+    background-color: #FFFFFF;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0 !important;
+}
+
+.table > thead > tr > th {
+    background-color: var(--light-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: #475569 !important; /* Slate 600 */
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600 !important;
+    font-size: 11px !important; /* Reduzido de 0.9rem */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 12px !important; /* Reduzido de 16px */
+    border-top: none !important;
+}
+
+.table > tbody > tr > td {
+    padding: 10px 12px !important; /* Reduzido de 16px */
+    border-top: 1px solid #F1F5F9 !important;
+    vertical-align: middle !important;
+    font-size: 13px !important;     /* Reduzido de 0.95rem */
+    color: #334155 !important;
+}
+
+.table-hover > tbody > tr:hover {
+    background-color: rgba(243, 112, 33, 0.02) !important;
+}
+
+/* Badges e Status */
+.ativo-sim {
+    color: var(--success);
+    font-weight: 700;
+    background-color: #E6F4EA;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.ativo-nao {
+    color: var(--danger);
+    font-weight: 700;
+    background-color: #FCE8E6;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+/* Ícones Lucide */
+.lucide-icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* Drawer Lateral (Painel Deslizante AJAX) */
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.drawer-panel {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Escondido dinamicamente de acordo com a largura do elemento */
+    width: 500px;
+    max-width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+    z-index: 1060;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-panel.active {
+    right: 0 !important;
+}
+
+/* Tamanhos de Drawer de acordo com a densidade do cadastro */
+.drawer-panel.drawer-sm {
+    width: 450px;
+}
+
+.drawer-panel.drawer-md {
+    width: 650px;
+}
+
+.drawer-panel.drawer-lg {
+    width: 850px; /* Largura estendida para formulários complexos como Clientes */
+}
+
+@media (max-width: 600px) {
+    .drawer-panel {
+        width: 100%;
+        right: -100%;
+    }
+}
+
+.drawer-panel.active {
+    right: 0 !important;
+}
+
+.drawer-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.drawer-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--dark-bg);
+}
+
+.drawer-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--primary-color) 0.2s ease;
+}
+
+.drawer-close-btn:hover {
+    color: var(--primary-color);
+}
+
+.drawer-body {
+    padding: 24px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.drawer-footer {
+    padding: 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background-color: var(--light-bg);
+}
+
+/* Erros de Validação e Placeholder */
+.field-validation-error {
+    color: var(--danger) !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    margin-top: 6px !important;
+    display: block !important;
+}
+
+.input-validation-error {
+    border-color: var(--danger) !important;
+    background-color: #FFF5F5 !important;
+}
+
+/* Animação do Loader */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Cards Estatísticos Modernos do Dashboard */
+.stat-cards-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 992px) {
+    .stat-cards-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .stat-cards-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-card-custom {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px; /* Reduzido de 24px */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.stat-card-title {
+    font-size: 11px; /* Reduzido */
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 !important;
+}
+
+.stat-card-icon-wrapper {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-card-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.7rem; /* Reduzido de 2.2rem */
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+    color: var(--dark-bg);
+}
+
+.stat-card-footer-info {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+}
+
+/* Cores dos Cards (Millenium Palette) */
+/* Finalizadas - Verde */
+.stat-card-success .stat-card-icon-wrapper {
+    background-color: #E6F4EA;
+    color: var(--success);
+}
+.stat-card-success .stat-card-footer-info span {
+    color: var(--success);
+}
+
+/* Pendentes - Laranja */
+.stat-card-warning .stat-card-icon-wrapper {
+    background-color: #FFF3E0;
+    color: var(--primary-color);
+}
+.stat-card-warning .stat-card-footer-info span {
+    color: var(--primary-color);
+}
+
+/* Não Realizadas - Vermelho */
+.stat-card-danger .stat-card-icon-wrapper {
+    background-color: #FCE8E6;
+    color: var(--danger);
+}
+.stat-card-danger .stat-card-footer-info span {
+    color: var(--danger);
+}
+
+/* Novos Clientes - Azul */
+.stat-card-info .stat-card-icon-wrapper {
+    background-color: #E8F0FE;
+    color: #1A73E8;
+}
+.stat-card-info .stat-card-footer-info span {
+    color: #1A73E8;
+}
+
+/* Atalhos e Widgets de Informações */
+.info-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .info-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.info-panel-custom {
+    background-color: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.info-panel-header {
+    background-color: var(--light-bg);
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-panel-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark-bg);
+    margin: 0 !important;
+}
+
+.info-panel-body {
+    padding: 24px;
+}
+
+.info-list-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background-color: var(--light-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.info-list-item:hover {
+    border-color: var(--primary-glow);
+    background-color: #FFFFFF;
+    transform: translateX(4px);
+    color: var(--primary-color) !important;
+}
+
+.info-list-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-list-badge {
+    background-color: var(--primary-color);
+    color: #FFFFFF;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 20px;
+}
+
+/* Layout alinhado de formulários e botões de busca */
+.form-actions-custom-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 25px; /* Alinha perfeitamente com os inputs que possuem labels */
+}
+
+.form-actions-custom-row .btn {
+    height: 42px !important; /* Altura de botão elegante condizente com o input */
+    width: 42px !important; /* Deixa o botão perfeitamente quadrado e compacto */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important; /* Remove padding para centralizar perfeitamente o ícone */
+    border-radius: var(--radius-md) !important;
+}
+
+/* Padronização de altura de inputs e dropdowns */
+.form-control {
+    height: 42px !important;
+    padding: 8px 14px !important;
+}
+
+/* Dropdown de Usuário Modernizada */
+body.skin-blue .dropdown-menu-usermenu {
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden;
+    padding: 0 !important;
+    width: 240px !important;
+    background-color: #FFFFFF !important;
+}
+
+body.skin-blue .dropdown-menu-usermenu .user-header {
+    background-color: var(--light-bg) !important;
+    padding: 20px !important;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color) !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    height: auto !important;
+}
+
+body.skin-blue .dropdown-menu-usermenu .user-header .user-avatar-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--primary-color);
+    background-color: rgba(243, 112, 33, 0.1);
+    padding: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+body.skin-blue .dropdown-menu-usermenu .user-header p {
+    color: var(--dark-bg) !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    margin: 0 !important;
+}
+
+body.skin-blue .dropdown-menu-usermenu .user-footer {
+    background-color: #FFFFFF !important;
+    padding: 12px 16px !important;
+    display: flex;
+    justify-content: flex-end;
+}
+
+body.skin-blue .dropdown-menu-usermenu .user-footer .btn-sair {
+    background-color: #FFF5F5 !important;
+    color: var(--danger) !important;
+    border: 1px solid #FCA5A5 !important;
+    padding: 8px 16px !important;
+    border-radius: var(--radius-md) !important;
+    font-size: 0.85rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.2s ease !important;
+    font-weight: 600 !important;
+}
+
+body.skin-blue .dropdown-menu-usermenu .user-footer .btn-sair:hover {
+    background-color: var(--danger) !important;
+    color: #FFFFFF !important;
+    border-color: var(--danger) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* -------------------------------------------------------------
+   SOBRESCITAS PARA O NOVO MASTER LAYOUT BLAZOR
+   ------------------------------------------------------------- */
+
+/* -------------------------------------------------------------
+   SOBRESCITAS PARA O NOVO MASTER LAYOUT BLAZOR
+   ------------------------------------------------------------- */
+
+/* Configuração de Posição do Header */
+.header-custom {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    background-color: #1E293B !important;
+    border-bottom: 1px solid #334155 !important;
+}
+
+/* Logo Corporativa no Header */
+.logo-custom {
+    background-color: #1E293B !important; /* Antracite Escuro */
+    color: #FFFFFF !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 1.15rem !important;
+    letter-spacing: 0.5px !important;
+    height: 50px !important;
+    width: 220px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-right: 1px solid #334155 !important;
+    transition: background-color 0.2s;
+    text-decoration: none !important;
+    margin: 0 !important;
+}
+
+.logo-custom:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.logo-brand-orange {
+    color: #F37021 !important; /* Laranja Corporativo */
+    font-weight: 800 !important;
+}
+
+/* Navbar Superior */
+.navbar-custom {
+    background-color: #1E293B !important; /* Antracite Escuro */
+    height: 50px !important;
+    min-height: 50px !important;
+    flex-grow: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-left: 0 !important;
+    border-bottom: none !important;
+    padding: 0 15px !important;
+}
+
+/* Botão Toggle da Sidebar */
+.navbar-custom .sidebar-toggle-btn-custom {
+    color: #FFFFFF !important;
+    background-color: transparent !important;
+    font-size: 1.2rem;
+    padding: 0 16px !important;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px !important;
+    width: 50px !important;
+    transition: background-color 0.2s;
+}
+
+.navbar-custom .sidebar-toggle-btn-custom:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Navegação Direita (Usuário Logado) */
+.navbar-custom .navbar-right-custom {
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.user-menu-custom {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.user-menu-custom > a {
+    color: #FFFFFF !important;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    padding: 15px 20px;
+    height: 50px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    user-select: none;
+}
+
+.user-menu-custom > a:hover,
+.user-menu-custom.open > a {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+}
+
+/* Dropdown de Usuário */
+.user-dropdown-menu-custom {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    width: 220px;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.user-menu-custom.open .user-dropdown-menu-custom {
+    display: flex;
+}
+
+.user-dropdown-header-custom {
+    background-color: #F8FAFC;
+    padding: 16px;
+    text-align: center;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.user-dropdown-header-custom p {
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    color: #1E293B;
+    font-size: 0.95rem;
+}
+
+.user-dropdown-footer-custom {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: flex-end;
+    background-color: #FFFFFF;
+}
+
+.btn-sair-custom {
+    background-color: #F37021 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 6px 16px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    font-size: 0.9rem !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s !important;
+    font-family: 'Outfit', sans-serif;
+}
+
+.btn-sair-custom:hover {
+    background-color: #D85C16 !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+}
+
+/* Layout Base (Wrapper e Margens) */
+.wrapper-custom {
+    min-height: 100vh !important;
+    position: relative;
+    padding-top: 50px; /* Compensa o header fixo */
+    background-color: #F8FAFC !important;
+}
+
+/* Sidebar */
+.left-side-custom {
+    position: fixed !important;
+    top: 50px !important;
+    bottom: 0;
+    left: 0;
+    width: 220px;
+    z-index: 1000;
+    overflow-y: auto;
+    border-right: 1px solid #E2E8F0 !important;
+    background-color: #FFFFFF !important;
+    transition: transform 0.3s ease-in-out, left 0.3s ease-in-out !important;
+}
+
+/* Conteúdo Principal */
+.right-side-custom {
+    margin-left: 220px;
+    min-height: calc(100vh - 50px);
+    background-color: #F8FAFC !important;
+    transition: margin-left 0.3s ease-in-out !important;
+}
+
+.right-side-content-custom {
+    padding: 24px !important; /* Reduzido de 30px */
+    background-color: #F8FAFC !important;
+    min-height: calc(100vh - 50px);
+}
+
+/* Cabeçalhos de Seção no Menu */
+.menu-section-header-custom {
+    font-size: 10px; /* Reduzido de 0.72rem */
+    font-weight: 700;
+    color: #94A3B8; /* Slate 400 */
+    padding: 12px 16px 6px 16px; /* Reduzidos os paddings */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Indicador Verde de Online */
+.status-dot-custom {
+    width: 8px;
+    height: 8px;
+    background-color: #10B981;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* COMPORTAMENTO RECOLHIDO DA SIDEBAR (Desktop) */
+.sidebar-collapsed-custom .left-side-custom {
+    left: -220px !important;
+    transform: translate3d(-220px, 0, 0);
+}
+
+.sidebar-collapsed-custom .right-side-custom {
+    margin-left: 0 !important;
+}
+
+.sidebar-collapsed-custom .header .navbar {
+    margin-left: 0 !important;
+}
+
+.sidebar-collapsed-custom .header .logo {
+    width: 220px; /* Mantém a logo no topo */
+}
+
+/* RESPONSIVIDADE (Mobile/Tablet <= 992px) */
+@media (max-width: 992px) {
+    .left-side-custom {
+        position: fixed !important;
+        transform: translate3d(-220px, 0, 0) !important;
+        left: 0 !important;
+        top: 50px !important;
+        width: 220px;
+    }
+    
+    .right-side-custom {
+        margin-left: 0 !important;
+    }
+    
+    body.skin-blue .header .navbar {
+        margin-left: 0 !important;
+    }
+    
+    /* Menu lateral ativo no celular */
+    .wrapper-custom.mobile-active-custom .left-side-custom {
+        transform: translate3d(0, 0, 0) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .wrapper-custom.mobile-active-custom .right-side-custom {
+        transform: translate3d(220px, 0, 0) !important;
+    }
+}

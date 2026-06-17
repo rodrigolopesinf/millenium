@@ -1,0 +1,648 @@
+@page "/Blazor/Solicitacao"
+@attribute [Authorize]
+@inject ISolicitacaoAppService SolicitacaoApp
+@inject IClienteAppService ClienteApp
+@inject ITipoSolicitacaoAppService TipoSolicitacaoApp
+@inject IEnderecoAppService EnderecoApp
+@inject IUsuarioAppService UsuarioApp
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JS
+@using Millenium.Domain.Entity
+@using Millenium.Infra.Data.Email
+
+<PageTitle>Pesquisas & Solicitações - Millenium</PageTitle>
+
+<div class="dashboard-container" style="padding: 10px;">
+    <!-- Cabeçalho Minimalista da Tela -->
+    <div class="page-header-container" style="margin-bottom: 24px;">
+        <h3 style="margin: 0; font-size: 24px; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif;">Pesquisas & Solicitações</h3>
+        <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 14px;">Acompanhe, cadastre e envie as respostas das pesquisas cadastrais e cadastros solicitados.</p>
+    </div>
+
+    <!-- Toolbar de Busca e Filtros Integrada -->
+    <div class="search-toolbar-custom" style="background-color: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+        <div class="toolbar-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <span class="toolbar-title" style="font-weight: 700; font-size: 15px; color: var(--dark-bg); display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif;">
+                <i class="fa fa-filter"></i> Filtros de Pesquisa
+            </span>
+            <button class="btn btn-primary" @onclick="AbrirNovoDrawer" style="display: flex; align-items: center; gap: 8px; border-radius: var(--radius-md); font-weight: 600; font-family: 'Outfit', sans-serif;">
+                <i class="fa fa-plus-circle"></i> Nova Solicitação
+            </button>
+        </div>
+        
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Nome</label>
+                <input type="text" @bind="filtroNome" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="Nome pesquisado..." style="border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" />
+            </div>
+            <div class="form-group col-md-3">
+                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">CPF</label>
+                <input type="text" @bind="filtroCpf" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="000.000.000-00" style="border-radius: var(--radius-md); border-color: var(--border-color);" />
+            </div>
+            
+            @if (nivelUsuario != 3)
+            {
+                <div class="form-group col-md-3">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Cliente</label>
+                    <select class="form-control" @bind="filtroClienteId" style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                        <option value="0">SELECIONE</option>
+                        @foreach (var c in clientes)
+                        {
+                            <option value="@c.IdCliente">@c.CodigoCliente - @(c.Cnpj != null ? c.NomeFantasia : c.Nome)</option>
+                        }
+                    </select>
+                </div>
+            }
+            
+            <div class="form-group col-md-2" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
+                <button class="btn btn-primary" @onclick="Filtrar" title="Buscar registros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md);">
+                    <i class="fa fa-search"></i>
+                </button>
+                <button class="btn btn-default" @onclick="LimparFiltros" title="Limpar filtros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border-color: var(--border-color);">
+                    <i class="fa fa-rotate-left"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Resultados -->
+    @if (carregando)
+    {
+        <div style="padding: 60px; text-align: center; color: var(--text-muted);">
+            <i class="fa fa-refresh fa-spin" style="font-size: 32px; margin-bottom: 16px; color: var(--primary-color);"></i>
+            <p style="font-weight: 600;">Carregando registros...</p>
+        </div>
+    }
+    else
+    {
+        <MilleniumTable TItem="Solicitacao" Items="solicitacoesFiltradas" ColSpan="7" PageSize="10">
+            <HeaderTemplate>
+                <th style="width: 80px; padding: 12px 16px; font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">ID</th>
+                <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Cliente</th>
+                <th style="font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Nome</th>
+                <th style="width: 150px; font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">CPF</th>
+                <th style="width: 100px; text-align: center; font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Imprimir</th>
+                <th style="width: 150px; text-align: center; font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Status</th>
+                <th style="width: 100px; text-align: center; font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase;">Excluir</th>
+            </HeaderTemplate>
+            <RowTemplate Context="item">
+                <td style="padding: 14px 16px; font-weight: 600; color: var(--primary-color);">@item.IdSolicitacao</td>
+                <td style="padding: 14px 16px;">@(item.Cliente != null ? item.Cliente.Nome : "")</td>
+                <td style="padding: 14px 16px; font-weight: 500; color: var(--dark-bg);">@item.Nome</td>
+                <td style="padding: 14px 16px;">@item.Cpf</td>
+                <td style="text-align: center; padding: 14px 16px;">
+                    <!-- Direcionamento para Rota MVC Legada que gera PDF com iTextSharp -->
+                    <a href="/Pesquisa/Solicitacao/Imprimir?Id=@item.IdSolicitacao" target="_blank" class="text-muted" title="Imprimir Relatório">
+                        <i class="fa fa-print" style="font-size: 16px;"></i>
+                    </a>
+                </td>
+                <td style="text-align: center; padding: 14px 16px;">
+                    <button class="btn btn-link" @onclick="() => AbrirEditarDrawer(item)" style="padding: 0; border: none; background: transparent; text-decoration: none;">
+                        @if (string.IsNullOrEmpty(item.Resposta))
+                        {
+                            <span style="display: inline-block; padding: 2px 10px; font-size: 12px; font-weight: 700; border-radius: 12px; background-color: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);">
+                                <i class="fa fa-clock-o"></i> Em aberto
+                            </span>
+                        }
+                        else
+                        {
+                            <span style="display: inline-block; padding: 2px 10px; font-size: 12px; font-weight: 700; border-radius: 12px; background-color: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                <i class="fa fa-check-circle"></i> Finalizado
+                            </span>
+                        }
+                    </button>
+                </td>
+                <td style="text-align: center; padding: 14px 16px;">
+                    <button class="btn btn-link text-danger" @onclick="() => ConfirmarExclusao(item)" style="padding: 0; border: none; background: transparent;" title="Excluir">
+                        <i class="fa fa-trash" style="font-size: 16px;"></i>
+                    </button>
+                </td>
+            </RowTemplate>
+        </MilleniumTable>
+    }
+</div>
+
+<!-- Drawer de Cadastro / Edição -->
+<MilleniumDrawer @bind-IsOpen="drawerAberto" Title="@drawerTitulo" Size="lg">
+    <ChildContent>
+        <EditForm Model="solicitacaoEdicao" OnValidSubmit="SalvarSolicitacao" style="display: flex; flex-direction: column; height: 100%;">
+            <DataAnnotationsValidator />
+            
+            <div style="flex-grow: 1; padding-bottom: 20px;">
+                <!-- Cabeçalho de Seção -->
+                <div style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-file-text-o"></i> Dados da Pesquisa
+                </div>
+
+                <div class="row">
+                    @if (solicitacaoEdicao.IdSolicitacao > 0)
+                    {
+                        <div class="form-group col-md-4">
+                            <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Número da Solicitação</label>
+                            <input type="text" class="form-control" value="@solicitacaoEdicao.NumeroSequencial" disabled style="border-radius: var(--radius-md); border-color: var(--border-color);" />
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Status</label>
+                            <input type="text" class="form-control" value="@(string.IsNullOrEmpty(solicitacaoEdicao.Resposta) ? "PENDENTE" : "CONCLUÍDO")" disabled style="border-radius: var(--radius-md); border-color: var(--border-color);" />
+                        </div>
+                    }
+
+                    <div class="form-group col-md-6">
+                        <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">
+                            Cliente <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-control" @bind="selectedClienteId" disabled="@(nivelUsuario == 3)" required style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                            <option value="0">SELECIONE</option>
+                            @foreach (var c in clientes)
+                            {
+                                <option value="@c.IdCliente">@c.CodigoCliente - @(c.Cnpj != null ? c.NomeFantasia : c.Nome)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">
+                            Tipo de Solicitação <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-control" @bind="selectedTipoSolicitacaoId" disabled="@isReadOnly" required style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                            <option value="0">SELECIONE</option>
+                            @foreach (var t in tiposSolicitacao)
+                            {
+                                <option value="@t.IdTipoSolicitacao">@t.Descricao</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-8">
+                        <MilleniumInput Label="Nome do Pesquisado" @bind-Value="solicitacaoEdicao.Nome" Placeholder="NOME COMPLETO" Required="true" Disabled="@isReadOnly" />
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label style="font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; color: var(--dark-bg);">
+                            Data de Nascimento <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" @bind="solicitacaoEdicao.DataNascimento" class="form-control" disabled="@isReadOnly" required style="border-radius: var(--radius-md); border-color: var(--border-color);" />
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <MilleniumInput Label="Local de Nascimento" @bind-Value="solicitacaoEdicao.Local" Placeholder="CIDADE - UF" Required="true" Disabled="@isReadOnly" />
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <MilleniumInput Label="CPF" @bind-Value="solicitacaoEdicao.Cpf" Placeholder="000.000.000-00" Required="true" Disabled="@isReadOnly" Maxlength="14" />
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <MilleniumInput Label="RG" @bind-Value="solicitacaoEdicao.Rg" Placeholder="SOMENTE NÚMEROS" Required="true" Disabled="@isReadOnly" Maxlength="9" />
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <MilleniumInput Label="Nome do Pai" @bind-Value="solicitacaoEdicao.NomePai" Placeholder="NOME COMPLETO DO PAI" Required="true" Disabled="@isReadOnly" />
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <MilleniumInput Label="Nome da Mãe" @bind-Value="solicitacaoEdicao.NomeMae" Placeholder="NOME COMPLETO DA MÃE" Required="true" Disabled="@isReadOnly" />
+                    </div>
+                </div>
+
+                <!-- Seção de Endereço -->
+                <div style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 20px; margin-bottom: 20px; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-map-marker"></i> Endereço do Pesquisado
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-3">
+                        <MilleniumInput Label="CEP" @bind-Value="enderecoEdicao.Cep" Placeholder="00000-000" Disabled="@isReadOnly" Maxlength="9" />
+                    </div>
+
+                    <div class="form-group col-md-7">
+                        <MilleniumInput Label="Logradouro" @bind-Value="enderecoEdicao.Logradouro" Placeholder="AVENIDA, RUA, ETC..." Disabled="@isReadOnly" />
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <MilleniumInput Label="Número" @bind-Value="enderecoEdicao.Numero" Placeholder="Nº" Disabled="@isReadOnly" Maxlength="20" />
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <MilleniumInput Label="Complemento" @bind-Value="enderecoEdicao.Complemento" Placeholder="APTO, BLOCO..." Disabled="@isReadOnly" />
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <MilleniumInput Label="Bairro" @bind-Value="enderecoEdicao.Bairro" Placeholder="BAIRRO" Disabled="@isReadOnly" />
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <MilleniumInput Label="Cidade" @bind-Value="enderecoEdicao.Cidade" Placeholder="CIDADE" Disabled="@isReadOnly" />
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <MilleniumInput Label="Estado (UF)" @bind-Value="enderecoEdicao.Estado" Placeholder="UF" Disabled="@isReadOnly" Maxlength="2" />
+                    </div>
+                </div>
+
+                <!-- Seção de Parecer da Pesquisa -->
+                <div style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 20px; margin-bottom: 20px; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-commenting-o"></i> Resposta da Pesquisa (Parecer)
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Parecer Social</label>
+                        <textarea class="form-control" @bind="solicitacaoEdicao.Resposta" disabled="@(!canEditResposta)" style="height: 120px; border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" placeholder="DIGITE AQUI A RESPOSTA OU PARECER DA PESQUISA..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer do Form -->
+            <div style="padding: 16px 0 0 0; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-default" @onclick="FecharDrawer" style="border-radius: var(--radius-md); border-color: var(--border-color); font-weight: 600;">Cancelar</button>
+                
+                @if (!isReadOnly || canEditResposta)
+                {
+                    <MilleniumButton Type="submit" Text="Salvar" Icon="fa fa-save" IsLoading="@salvando" LoadingText="Salvando..." Style="primary" StyleAttribute="border-radius: var(--radius-md); font-weight: 600;" />
+                }
+            </div>
+        </EditForm>
+    </ChildContent>
+</MilleniumDrawer>
+
+@code {
+    private bool carregando = true;
+    private bool salvando = false;
+    private bool drawerAberto = false;
+    private string drawerTitulo = "";
+
+    // Usuário logado
+    private Usuario? usuarioLogado;
+    private int nivelUsuario = 0;
+
+    // Filtros
+    private string filtroNome = "";
+    private string filtroCpf = "";
+    private int filtroClienteId = 0;
+
+    // Coleções
+    private List<Solicitacao> todasSolicitacoes = new();
+    private List<Solicitacao> solicitacoesFiltradas = new();
+    private List<Cliente> clientes = new();
+    private List<TipoSolicitacao> tiposSolicitacao = new();
+
+    // Edição
+    private Solicitacao solicitacaoEdicao = new();
+    private Endereco enderecoEdicao = new();
+    private int selectedClienteId;
+    private int selectedTipoSolicitacaoId;
+
+    // Flag de somente leitura (nível 3 + respondido)
+    private bool isReadOnly => nivelUsuario == 3 && !string.IsNullOrEmpty(solicitacaoEdicao.Resposta);
+    // Flag se o parecer de resposta pode ser editado (somente nível 1 ou 2)
+    private bool canEditResposta => nivelUsuario != 3;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarDadosAsync();
+    }
+
+    private async Task CarregarDadosAsync()
+    {
+        carregando = true;
+        try
+        {
+            // Obter usuário logado para aplicar permissões
+            var userLogin = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(userLogin))
+            {
+                usuarioLogado = UsuarioApp.ObterUsuarioLogin(userLogin);
+                nivelUsuario = usuarioLogado?.IdNivel ?? 0;
+            }
+
+            await Task.Run(() =>
+            {
+                todasSolicitacoes = SolicitacaoApp.ObterSolicitacoesAtivas()
+                    ?.OrderByDescending(x => x.IdSolicitacao)
+                    .ToList() ?? new List<Solicitacao>();
+
+                clientes = ClienteApp.GetAll()?.OrderBy(c => c.Nome).ToList() ?? new();
+                tiposSolicitacao = TipoSolicitacaoApp.GetAll()?.OrderBy(t => t.Descricao).ToList() ?? new();
+
+                // Sincroniza relacionamentos virtuais para a listagem (ex: Cliente)
+                foreach (var item in todasSolicitacoes)
+                {
+                    if (item.IdCliente != null)
+                    {
+                        item.Cliente = clientes.FirstOrDefault(c => c.IdCliente == item.IdCliente) ?? new();
+                    }
+                }
+            });
+
+            Filtrar();
+        }
+        catch (Exception)
+        {
+            // Tratar erro de forma amigável
+        }
+        finally
+        {
+            carregando = false;
+        }
+    }
+
+    private void Filtrar()
+    {
+        var query = todasSolicitacoes.AsQueryable();
+
+        // Se for usuário nível 3, filtra APENAS as solicitações do cliente dele
+        if (nivelUsuario == 3 && usuarioLogado != null)
+        {
+            query = query.Where(x => x.IdCliente == usuarioLogado.IdCliente);
+        }
+        else if (filtroClienteId > 0)
+        {
+            query = query.Where(x => x.IdCliente == filtroClienteId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filtroNome))
+        {
+            query = query.Where(x => x.Nome.Contains(filtroNome, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filtroCpf))
+        {
+            var cpfLimpo = filtroCpf.Replace(".", "").Replace("-", "").Trim();
+            query = query.Where(x => x.Cpf.Replace(".", "").Replace("-", "").Trim().Contains(cpfLimpo));
+        }
+
+        solicitacoesFiltradas = query.ToList();
+    }
+
+    private void LimparFiltros()
+    {
+        filtroNome = "";
+        filtroCpf = "";
+        filtroClienteId = 0;
+        Filtrar();
+    }
+
+    private void HandleFiltroEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Filtrar();
+        }
+    }
+
+    private void AbrirNovoDrawer()
+    {
+        solicitacaoEdicao = new Solicitacao
+        {
+            DataNascimento = DateTime.Today.AddYears(-30),
+            Nome = "",
+            NomeMae = "",
+            NomePai = "",
+            Local = "",
+            Cpf = "",
+            Rg = ""
+        };
+        enderecoEdicao = new Endereco
+        {
+            Cep = "",
+            Logradouro = "",
+            Numero = "",
+            Complemento = "",
+            Bairro = "",
+            Cidade = "",
+            Estado = ""
+        };
+
+        selectedClienteId = nivelUsuario == 3 ? (usuarioLogado?.IdCliente ?? 0) : 0;
+        selectedTipoSolicitacaoId = 0;
+        drawerTitulo = "Nova Solicitação de Pesquisa";
+        drawerAberto = true;
+    }
+
+    private void AbrirEditarDrawer(Solicitacao item)
+    {
+        solicitacaoEdicao = new Solicitacao
+        {
+            IdSolicitacao = item.IdSolicitacao,
+            IdCliente = item.IdCliente,
+            IdTipoSolicitacao = item.IdTipoSolicitacao,
+            Nome = item.Nome,
+            NomeMae = item.NomeMae,
+            NomePai = item.NomePai,
+            Local = item.Local,
+            Cpf = item.Cpf,
+            Rg = item.Rg,
+            DataNascimento = item.DataNascimento,
+            NumeroSequencial = item.NumeroSequencial,
+            Resposta = item.Resposta,
+            IdEndereco = item.IdEndereco,
+            DataHoraCriacao = item.DataHoraCriacao,
+            IdUsuarioCriacao = item.IdUsuarioCriacao
+        };
+
+        // Carrega o endereço associado
+        if (item.IdEndereco > 0)
+        {
+            var end = EnderecoApp.GetById(item.IdEndereco ?? 0);
+            if (end != null)
+            {
+                enderecoEdicao = new Endereco
+                {
+                    IdEndereco = end.IdEndereco,
+                    Cep = end.Cep,
+                    Logradouro = end.Logradouro,
+                    Numero = end.Numero,
+                    Complemento = end.Complemento,
+                    Bairro = end.Bairro,
+                    Cidade = end.Cidade,
+                    Estado = end.Estado
+                };
+            }
+        }
+        else
+        {
+            enderecoEdicao = new Endereco();
+        }
+
+        selectedClienteId = item.IdCliente ?? 0;
+        selectedTipoSolicitacaoId = item.IdTipoSolicitacao;
+        drawerTitulo = "Visualizar / Responder Solicitação";
+        drawerAberto = true;
+    }
+
+    private void FecharDrawer()
+    {
+        drawerAberto = false;
+    }
+
+    private async Task SalvarSolicitacao()
+    {
+        if (salvando) return;
+        salvando = true;
+        
+        try
+        {
+            solicitacaoEdicao.IdCliente = selectedClienteId > 0 ? selectedClienteId : (usuarioLogado?.IdCliente ?? 0);
+            solicitacaoEdicao.IdTipoSolicitacao = selectedTipoSolicitacaoId;
+
+            await Task.Run(() =>
+            {
+                if (solicitacaoEdicao.IdSolicitacao == 0)
+                {
+                    // Formata endereço
+                    enderecoEdicao.Logradouro = enderecoEdicao.Logradouro?.ToUpper();
+                    enderecoEdicao.Complemento = enderecoEdicao.Complemento?.ToUpper();
+                    enderecoEdicao.Cidade = enderecoEdicao.Cidade?.ToUpper();
+                    enderecoEdicao.Estado = enderecoEdicao.Estado?.ToUpper();
+                    enderecoEdicao.Bairro = enderecoEdicao.Bairro?.ToUpper();
+
+                    // Insere endereço
+                    EnderecoApp.Add(enderecoEdicao);
+                    
+                    solicitacaoEdicao.IdEndereco = enderecoEdicao.IdEndereco;
+                    solicitacaoEdicao.Endereco = enderecoEdicao;
+
+                    solicitacaoEdicao.Nome = solicitacaoEdicao.Nome.ToUpper().Trim();
+                    solicitacaoEdicao.NomeMae = solicitacaoEdicao.NomeMae.ToUpper().Trim();
+                    solicitacaoEdicao.NomePai = solicitacaoEdicao.NomePai.ToUpper().Trim();
+                    solicitacaoEdicao.Local = solicitacaoEdicao.Local.ToUpper().Trim();
+                    solicitacaoEdicao.Cpf = solicitacaoEdicao.Cpf?.Trim();
+                    solicitacaoEdicao.Rg = solicitacaoEdicao.Rg?.Trim();
+                    
+                    solicitacaoEdicao.DataHoraCriacao = DateTime.Now;
+                    solicitacaoEdicao.IdUsuarioCriacao = usuarioLogado?.IdUsuario ?? 1;
+                    solicitacaoEdicao.Excluido = false;
+
+                    // Gerar sequencial
+                    GerarNumeroSequencial(solicitacaoEdicao);
+
+                    SolicitacaoApp.Add(solicitacaoEdicao);
+                    
+                    // Envia email de notificação (Igual ao MVC)
+                    string mensagem = " <br/> O cliente " + solicitacaoEdicao.Cliente?.NomeFantasia + " gerou a solicitação de número " + solicitacaoEdicao.NumeroSequencial;
+                    new Email(solicitacaoEdicao, "consulta@millenium.com.br", "Nova solicitação do cliente", mensagem);
+                }
+                else
+                {
+                    // Edição
+                    var existente = SolicitacaoApp.GetById(solicitacaoEdicao.IdSolicitacao);
+                    if (existente != null)
+                    {
+                        // Atualiza endereço
+                        if (existente.IdEndereco > 0)
+                        {
+                            var endExistente = EnderecoApp.GetById(existente.IdEndereco ?? 0);
+                            if (endExistente != null)
+                            {
+                                endExistente.Cep = enderecoEdicao.Cep;
+                                endExistente.Logradouro = enderecoEdicao.Logradouro?.ToUpper();
+                                endExistente.Numero = enderecoEdicao.Numero;
+                                endExistente.Complemento = enderecoEdicao.Complemento?.ToUpper();
+                                endExistente.Bairro = enderecoEdicao.Bairro?.ToUpper();
+                                endExistente.Cidade = enderecoEdicao.Cidade?.ToUpper();
+                                endExistente.Estado = enderecoEdicao.Estado?.ToUpper();
+                                EnderecoApp.Update(endExistente);
+                            }
+                        }
+
+                        existente.IdCliente = solicitacaoEdicao.IdCliente;
+                        existente.IdTipoSolicitacao = solicitacaoEdicao.IdTipoSolicitacao;
+                        
+                        if (nivelUsuario != 3)
+                        {
+                            existente.Nome = solicitacaoEdicao.Nome.ToUpper().Trim();
+                            existente.NomeMae = solicitacaoEdicao.NomeMae.ToUpper().Trim();
+                            existente.NomePai = solicitacaoEdicao.NomePai.ToUpper().Trim();
+                            existente.Local = solicitacaoEdicao.Local.ToUpper().Trim();
+                            existente.Cpf = solicitacaoEdicao.Cpf?.Trim();
+                            existente.Rg = solicitacaoEdicao.Rg?.Trim();
+                            existente.DataNascimento = solicitacaoEdicao.DataNascimento;
+                        }
+
+                        if (canEditResposta)
+                        {
+                            existente.Resposta = solicitacaoEdicao.Resposta?.ToUpper().Trim();
+                        }
+
+                        existente.DataHoraAlteracao = DateTime.Now;
+                        existente.IdUsuarioAlteracao = usuarioLogado?.IdUsuario ?? 1;
+
+                        SolicitacaoApp.Update(existente);
+
+                        // Se a resposta foi salva e concluída por um gestor, envia email
+                        if (canEditResposta && !string.IsNullOrEmpty(existente.Resposta))
+                        {
+                            string msgConcluido = " <br/> Sua solicitação está concluída, acesse https://www.milleniumpesquisas.com.br/ para visualizar a resposta. ";
+                            var clienteObj = ClienteApp.GetById(existente.IdCliente ?? 0);
+                            if (clienteObj != null && !string.IsNullOrEmpty(clienteObj.EmailPrincipal))
+                            {
+                                new Email(existente, clienteObj.EmailPrincipal, "Resposta de solicitação de pesquisa", msgConcluido);
+                            }
+                        }
+                    }
+                }
+            });
+
+            await CarregarDadosAsync();
+            FecharDrawer();
+        }
+        catch (Exception)
+        {
+            // Tratar erros de concorrência ou banco
+        }
+        finally
+        {
+            salvando = false;
+        }
+    }
+
+    private void GerarNumeroSequencial(Solicitacao obj)
+    {
+        var idCliente = (int)obj.IdCliente;
+        obj.Cliente = ClienteApp.GetById(idCliente);
+        obj.Ano = DateTime.Now.Year;
+        obj.Sequencia = GetSequencial(obj.Ano, idCliente);
+
+        obj.NumeroSequencial = obj.Cliente.CodigoCliente + " - " + obj.Sequencia + "/" + obj.Ano;
+    }
+
+    private int GetSequencial(int ano, int idCliente)
+    {
+        var sequencia = 1;
+        var codSequencial = SolicitacaoApp.GetAll()
+            ?.LastOrDefault(x => x.IdCliente == idCliente);
+
+        if (codSequencial != null)
+        {
+            if (!(ano > codSequencial.Ano))
+                sequencia = codSequencial.Sequencia + sequencia;
+        }
+
+        return sequencia;
+    }
+
+    private async Task ConfirmarExclusao(Solicitacao item)
+    {
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", $"Deseja realmente excluir a solicitação do pesquisado '{item.Nome}'?");
+        if (confirmado)
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    var existente = SolicitacaoApp.GetById(item.IdSolicitacao);
+                    if (existente != null)
+                    {
+                        SolicitacaoApp.Remove(existente);
+                    }
+                });
+                await CarregarDadosAsync();
+            }
+            catch (Exception)
+            {
+                // Tratar erro
+            }
+        }
+    }
+}

@@ -1,0 +1,296 @@
+@inherits LayoutComponentBase
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<HeadContent>
+    <link href="/css/painel-moderno.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+</HeadContent>
+
+@inject NavigationManager NavigationManager
+
+
+<div class="wrapper-custom @(sidebarCollapsed ? "sidebar-collapsed-custom" : "") @(mobileMenuOpen ? "mobile-active-custom" : "")" @onclick="FecharDropdowns">
+    <!-- Header Superior -->
+    <header class="header-custom">
+        <a href="/Blazor/Dashboard" class="logo-custom" style="padding: 5px 15px;">
+            <div style="background-color: #ffffff; padding: 5px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; height: 38px; width: 100%;">
+                <img src="/img/millenium-logo-novo.png" alt="Millenium Pesquisas Cadastrais" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+            </div>
+        </a>
+        
+        <nav class="navbar-custom" role="navigation">
+            <!-- Botão de Toggle da Sidebar (Nativo Blazor) -->
+            <button class="sidebar-toggle-btn-custom" @onclick="ToggleSidebar" @onclick:stopPropagation>
+                <i class="fa fa-bars"></i>
+            </button>
+            
+            <div class="navbar-right-custom">
+                <ul class="nav navbar-nav">
+                    <!-- Dropdown de Perfil -->
+                    <li class="user-menu-custom @(userDropdownOpen ? "open" : "")">
+                        <a @onclick="ToggleUserDropdown" @onclick:stopPropagation>
+                            <i class="fa fa-user"></i>
+                            <span>@usuarioNome</span>
+                            <i class="fa fa-caret-down" style="font-size: 10px; margin-left: 4px;"></i>
+                        </a>
+                        
+                        <div class="user-dropdown-menu-custom">
+                            <div class="user-dropdown-header-custom">
+                                <p>@usuarioNome</p>
+                            </div>
+                            <div class="user-dropdown-footer-custom">
+                                <a href="/api/auth/logout" class="btn-sair-custom">
+                                    <i class="fa fa-sign-out"></i> Sair
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Estrutura Principal -->
+    <div class="wrapper row-offcanvas row-offcanvas-left">
+        <!-- Sidebar Esquerda -->
+        <aside class="left-side-custom sidebar-offcanvas">
+            <section class="sidebar">
+                <!-- Painel do Usuário (Nome + Status Online) -->
+                <div class="user-panel" style="background-color: #F8FAFC; border-bottom: 1px solid #E2E8F0; padding: 12px 14px; display: flex; align-items: center; gap: 10px;">
+                    <div class="pull-left image">
+                        <div style="background-color: #F37021; color: #FFFFFF; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 0.9rem;">
+                            @usuarioPrimeiraLetra
+                        </div>
+                    </div>
+                    <div class="pull-left info" style="padding: 0; margin: 0; line-height: 1.25;">
+                        <p style="color: #1E293B; font-size: 0.85rem; font-weight: 600; margin: 0 0 2px 0; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Olá, @usuarioNome
+                        </p>
+                        <span style="color: #64748B; font-weight: 500; font-size: 0.72rem; display: flex; align-items: center; gap: 4px; text-decoration: none;">
+                            <span class="status-dot-custom"></span> Online
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Menu de Navegação Vertical -->
+                <ul class="sidebar-menu">
+                    <!-- Seção ADMINISTRAÇÃO -->
+                    <li class="menu-section-header-custom">Administração</li>
+                    <li class="@(isActive("/Blazor/Dashboard") ? "active" : "")">
+                        <a href="/Blazor/Dashboard">
+                            <i class="fa fa-dashboard" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <!-- Seção CADASTROS -->
+                    <li class="menu-section-header-custom">Cadastros</li>
+                    <li class="treeview @(cadastroMenuOpen ? "active" : "")">
+                        <a href="javascript:;" @onclick="ToggleCadastroMenu" @onclick:stopPropagation style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span>
+                                <i class="fa fa-edit" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                                <span>Cadastros de Apoio</span>
+                            </span>
+                            <i class="fa @(cadastroMenuOpen ? "fa-angle-down" : "fa-angle-left")" style="font-size: 14px;"></i>
+                        </a>
+                        
+                        <!-- Submenu Sanfona (Nativo Blazor) -->
+                        <ul class="treeview-menu" style="display: @(cadastroMenuOpen ? "block" : "none"); list-style: none;">
+                            <li class="@(isActive("/Blazor/Cliente") ? "active" : "")">
+                                <a href="/Blazor/Cliente">Clientes</a>
+                            </li>
+                            <li class="@(isActive("/Blazor/TipoCliente") ? "active" : "")">
+                                <a href="/Blazor/TipoCliente">Tipo de Cliente</a>
+                            </li>
+                            <li class="@(isActive("/Blazor/TipoSolicitacao") ? "active" : "")">
+                                <a href="/Blazor/TipoSolicitacao">Tipo de Solicitação</a>
+                            </li>
+                            <li class="@(isActive("/Blazor/Usuario") ? "active" : "")">
+                                <a href="/Blazor/Usuario">Usuários</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Seção SOLICITAÇÕES -->
+                    <li class="menu-section-header-custom">Solicitações</li>
+                    <li class="@(isActive("/Blazor/Solicitacao") ? "active" : "")">
+                        <a href="/Blazor/Solicitacao">
+                            <i class="fa fa-search" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                            <span>Pesquisas</span>
+                        </a>
+                    </li>
+
+                    <!-- Seção FATURAMENTO -->
+                    <li class="menu-section-header-custom">Faturamento</li>
+                    <li class="@(isActive("/Blazor/Faturamento") ? "active" : "")">
+                        <a href="/Blazor/Faturamento">
+                            <i class="fa fa-bar-chart-o" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                            <span>Gerar</span>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </aside>
+
+        <!-- Área de Conteúdo Principal -->
+        <aside class="right-side-custom">
+            <section class="right-side-content-custom">
+                @Body
+            </section>
+        </aside>
+    </div>
+</div>
+
+<style>
+    .header-custom {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1030 !important;
+        height: 50px !important;
+        display: flex !important;
+        align-items: center !important;
+        background-color: #1E293B !important;
+        border-bottom: 1px solid #334155 !important;
+    }
+
+    .logo-custom {
+        background-color: #1E293B !important;
+        color: #FFFFFF !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 1.15rem !important;
+        letter-spacing: 0.5px !important;
+        height: 50px !important;
+        width: 220px !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-right: 1px solid #334155 !important;
+        transition: background-color 0.2s;
+        text-decoration: none !important;
+        margin: 0 !important;
+    }
+
+    .logo-custom:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .navbar-custom {
+        background-color: #1E293B !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        flex-grow: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-left: 0 !important;
+        border-bottom: none !important;
+        padding: 0 15px !important;
+    }
+
+    .navbar-custom .sidebar-toggle-btn-custom {
+        color: #FFFFFF !important;
+        background-color: transparent !important;
+        font-size: 1.2rem;
+        padding: 0 16px !important;
+        cursor: pointer;
+        border: none;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 50px !important;
+        width: 50px !important;
+        transition: background-color 0.2s;
+    }
+
+    .navbar-custom .sidebar-toggle-btn-custom:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .navbar-custom .navbar-right-custom {
+        height: 50px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+</style>
+
+@code {
+    private string usuarioNome = "ADMINISTRADOR";
+    private string usuarioPrimeiraLetra = "A";
+    private bool sidebarCollapsed = false;
+    private bool userDropdownOpen = false;
+    private bool cadastroMenuOpen = false;
+    private bool mobileMenuOpen = false;
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            var user = HttpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                usuarioNome = user.Identity.Name?.ToUpper() ?? "ADMINISTRADOR";
+                if (!string.IsNullOrEmpty(usuarioNome))
+                {
+                    // Pega o primeiro nome se for muito longo
+                    var partes = usuarioNome.Split(' ');
+                    usuarioNome = partes[0];
+                    if (partes.Length > 1 && partes[0].Length < 4) 
+                    {
+                        usuarioNome += " " + partes[1];
+                    }
+                    
+                    usuarioPrimeiraLetra = usuarioNome.Substring(0, 1);
+                }
+            }
+        }
+        catch
+        {
+            usuarioNome = "ADMINISTRADOR";
+            usuarioPrimeiraLetra = "A";
+        }
+        
+        // Iniciar submenu aberto se o usuário estiver em alguma página do cadastro
+        cadastroMenuOpen = isCadastroActive();
+    }
+
+    private void ToggleSidebar()
+    {
+        // Se for desktop, recolhe/expande
+        // Se for mobile (largura menor que 992px), aciona o menu lateral
+        sidebarCollapsed = !sidebarCollapsed;
+        mobileMenuOpen = !mobileMenuOpen;
+    }
+
+    private void ToggleUserDropdown()
+    {
+        userDropdownOpen = !userDropdownOpen;
+    }
+
+    private void ToggleCadastroMenu()
+    {
+        cadastroMenuOpen = !cadastroMenuOpen;
+    }
+
+    private void FecharDropdowns()
+    {
+        userDropdownOpen = false;
+        mobileMenuOpen = false;
+    }
+
+    private bool isActive(string path)
+    {
+        var uri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        return ("/" + uri).Equals(path, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool isCadastroActive()
+    {
+        return isActive("/Blazor/Cliente") || 
+               isActive("/Blazor/TipoCliente") || 
+               isActive("/Blazor/TipoSolicitacao") || 
+               isActive("/Blazor/Usuario");
+    }
+}
