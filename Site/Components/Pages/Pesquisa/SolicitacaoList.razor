@@ -12,6 +12,13 @@
 
 <PageTitle>Pesquisas & Solicitações - Millenium</PageTitle>
 
+<style>
+    .search-toolbar-custom input::placeholder {
+        color: #cbd5e1 !important;
+        opacity: 0.85;
+    }
+</style>
+
 <div class="dashboard-container" style="padding: 10px;">
     <!-- Cabeçalho Minimalista da Tela -->
     <div class="page-header-container" style="margin-bottom: 24px;">
@@ -30,39 +37,41 @@
             </button>
         </div>
         
-        <div class="row">
-            <div class="form-group col-md-4">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Nome</label>
-                <input type="text" @bind="filtroNome" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="Nome pesquisado..." style="border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" />
-            </div>
-            <div class="form-group col-md-3">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">CPF</label>
-                <input type="text" @bind="filtroCpf" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="000.000.000-00" style="border-radius: var(--radius-md); border-color: var(--border-color);" />
-            </div>
-            
-            @if (nivelUsuario != 3)
-            {
-                <div class="form-group col-md-3">
-                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Cliente</label>
-                    <select class="form-control" @bind="filtroClienteId" style="border-radius: var(--radius-md); border-color: var(--border-color);">
-                        <option value="0">SELECIONE</option>
-                        @foreach (var c in clientes)
-                        {
-                            <option value="@c.IdCliente">@c.CodigoCliente - @(c.Cnpj != null ? c.NomeFantasia : c.Nome)</option>
-                        }
-                    </select>
+        <form @onsubmit="Filtrar" style="margin: 0; padding: 0;">
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Nome</label>
+                    <input type="text" @bind="filtroNome" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="Nome pesquisado..." style="border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" />
                 </div>
-            }
-            
-            <div class="form-group col-md-2" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
-                <button class="btn btn-primary" @onclick="Filtrar" title="Buscar registros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md);">
-                    <i class="fa fa-search"></i>
-                </button>
-                <button class="btn btn-default" @onclick="LimparFiltros" title="Limpar filtros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border-color: var(--border-color);">
-                    <i class="fa fa-rotate-left"></i>
-                </button>
+                <div class="form-group col-md-3">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">CPF</label>
+                    <input type="text" @bind="filtroCpf" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="000.000.000-00" style="border-radius: var(--radius-md); border-color: var(--border-color);" />
+                </div>
+                
+                @if (nivelUsuario != 3)
+                {
+                    <div class="form-group col-md-3">
+                        <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Cliente</label>
+                        <select class="form-control" @bind="filtroClienteId" style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                            <option value="0">SELECIONE</option>
+                            @foreach (var c in clientes)
+                            {
+                                <option value="@c.IdCliente">@c.CodigoCliente - @(c.Cnpj != null ? c.NomeFantasia : c.Nome)</option>
+                            }
+                        </select>
+                    </div>
+                }
+                
+                <div class="form-group col-md-2" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
+                    <button type="submit" class="btn btn-primary" title="Buscar registros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md);">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" @onclick="LimparFiltros" title="Limpar filtros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border-color: var(--border-color);">
+                        <i class="fa fa-rotate-left"></i>
+                    </button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <!-- Tabela de Resultados -->
@@ -113,8 +122,8 @@
                     </button>
                 </td>
                 <td style="text-align: center; padding: 14px 16px;">
-                    <button class="btn btn-link text-danger" @onclick="() => ConfirmarExclusao(item)" style="padding: 0; border: none; background: transparent;" title="Excluir">
-                        <i class="fa fa-trash" style="font-size: 16px;"></i>
+                    <button class="btn btn-link" @onclick="() => ConfirmarExclusao(item)" style="color: var(--primary-color); padding: 0; border: none; background: transparent;" title="Excluir">
+                        <i class="fa fa-trash-o" style="font-size: 16px;"></i>
                     </button>
                 </td>
             </RowTemplate>
@@ -278,7 +287,12 @@
 
     // Filtros
     private string filtroNome = "";
-    private string filtroCpf = "";
+    private string _filtroCpf = "";
+    private string filtroCpf
+    {
+        get => _filtroCpf;
+        set => _filtroCpf = FormatarCpf(value);
+    }
     private int filtroClienteId = 0;
 
     // Coleções
@@ -644,5 +658,17 @@
                 // Tratar erro
             }
         }
+    }
+
+    private static string FormatarCpf(string cpf)
+    {
+        if (string.IsNullOrEmpty(cpf)) return "";
+        var apenasNumeros = new string(cpf.Where(char.IsDigit).ToArray());
+        if (apenasNumeros.Length > 11) apenasNumeros = apenasNumeros.Substring(0, 11);
+
+        if (apenasNumeros.Length <= 3) return apenasNumeros;
+        if (apenasNumeros.Length <= 6) return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3)}";
+        if (apenasNumeros.Length <= 9) return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros.Substring(6)}";
+        return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros.Substring(6, 3)}-{apenasNumeros.Substring(9)}";
     }
 }

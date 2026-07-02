@@ -6,9 +6,18 @@
 @inject IEnderecoAppService EnderecoApp
 @inject IContatoAppService ContatoApp
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @using Millenium.Domain.Entity
+@using System.Security.Claims
 
 <PageTitle>Gestão de Clientes - Millenium</PageTitle>
+
+<style>
+    .search-toolbar-custom input::placeholder {
+        color: #cbd5e1 !important;
+        opacity: 0.85;
+    }
+</style>
 
 <div class="dashboard-container" style="padding: 10px;">
     <!-- Cabeçalho Minimalista da Tela -->
@@ -27,39 +36,41 @@
                 <i class="fa fa-user-plus"></i> Novo Cliente
             </button>
         </div>
-        
-        <div class="row">
-            <div class="form-group col-md-3">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Nome / Razão Social</label>
-                <input type="text" @bind="filtroNome" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="Nome completo ou fantasia..." style="border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" />
+
+        <form @onsubmit="Filtrar" style="margin: 0; padding: 0;">
+            <div class="row">
+                <div class="form-group col-md-3">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Nome / Razão Social</label>
+                    <input type="text" @bind="filtroNome" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="Nome completo ou fantasia..." style="border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">CPF</label>
+                    <input type="text" @bind="filtroCpf" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="000.000.000-00" style="border-radius: var(--radius-md); border-color: var(--border-color);" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">CNPJ</label>
+                    <input type="text" @bind="filtroCnpj" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="00.000.000/0001-00" style="border-radius: var(--radius-md); border-color: var(--border-color);" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Situação</label>
+                    <select class="form-control" @bind="filtroSituacaoId" style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                        <option value="0">SELECIONE</option>
+                        @foreach (var s in situacoes)
+                        {
+                            <option value="@s.IdSituacaoCliente">@s.Descricao</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group col-md-3" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
+                    <button type="submit" class="btn btn-primary" title="Buscar registros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md);">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" @onclick="LimparFiltros" title="Limpar filtros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border-color: var(--border-color);">
+                        <i class="fa fa-rotate-left"></i>
+                    </button>
+                </div>
             </div>
-            <div class="form-group col-md-2">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">CPF</label>
-                <input type="text" @bind="filtroCpf" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="000.000.000-00" style="border-radius: var(--radius-md); border-color: var(--border-color);" />
-            </div>
-            <div class="form-group col-md-2">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">CNPJ</label>
-                <input type="text" @bind="filtroCnpj" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="00.000.000/0001-00" style="border-radius: var(--radius-md); border-color: var(--border-color);" />
-            </div>
-            <div class="form-group col-md-2">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Situação</label>
-                <select class="form-control" @bind="filtroSituacaoId" style="border-radius: var(--radius-md); border-color: var(--border-color);">
-                    <option value="0">SELECIONE</option>
-                    @foreach (var s in situacoes)
-                    {
-                        <option value="@s.IdSituacaoCliente">@s.Descricao</option>
-                    }
-                </select>
-            </div>
-            <div class="form-group col-md-3" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
-                <button class="btn btn-primary" @onclick="Filtrar" title="Buscar registros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md);">
-                    <i class="fa fa-search"></i>
-                </button>
-                <button class="btn btn-default" @onclick="LimparFiltros" title="Limpar filtros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border-color: var(--border-color);">
-                    <i class="fa fa-rotate-left"></i>
-                </button>
-            </div>
-        </div>
+        </form>
     </div>
 
     <!-- Tabela de Resultados -->
@@ -87,9 +98,27 @@
                     @(string.IsNullOrEmpty(item.Cnpj) ? item.Nome : item.RazaoSocial)
                 </td>
                 <td style="padding: 14px 16px;">
-                    <span style="display: inline-block; padding: 2px 10px; font-size: 12px; font-weight: 700; border-radius: 12px; background-color: rgba(30, 41, 59, 0.05); color: var(--dark-bg);">
-                        @(item.SituacaoCliente?.Descricao ?? "N/D")
-                    </span>
+                    @{
+                        var sitTexto = ObterSituacaoTexto(item);
+                        if (sitTexto == "ATIVO")
+                        {
+                            <span style="display: inline-block; padding: 2px 10px; font-size: 12px; font-weight: 700; border-radius: 12px; background-color: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                ATIVO
+                            </span>
+                        }
+                        else if (sitTexto == "INATIVO" || sitTexto == "CANCELADO")
+                        {
+                            <span style="display: inline-block; padding: 2px 10px; font-size: 12px; font-weight: 700; border-radius: 12px; background-color: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                INATIVO
+                            </span>
+                        }
+                        else
+                        {
+                            <span style="display: inline-block; padding: 2px 10px; font-size: 12px; font-weight: 700; border-radius: 12px; background-color: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);">
+                                @sitTexto
+                            </span>
+                        }
+                    }
                 </td>
                 <td style="text-align: center; padding: 14px 16px;">
                     @if (item.Ativo)
@@ -111,8 +140,8 @@
                     </button>
                 </td>
                 <td style="text-align: center; padding: 14px 16px;">
-                    <button class="btn btn-link text-danger" @onclick="() => ConfirmarExclusao(item)" style="padding: 0; border: none; background: transparent;" title="Excluir">
-                        <i class="fa fa-trash" style="font-size: 16px;"></i>
+                    <button class="btn btn-link" @onclick="() => ConfirmarExclusao(item)" style="color: var(--primary-color); padding: 0; border: none; background: transparent;" title="Excluir">
+                        <i class="fa fa-trash-o" style="font-size: 16px;"></i>
                     </button>
                 </td>
             </RowTemplate>
@@ -125,7 +154,7 @@
     <ChildContent>
         <EditForm Model="clienteEdicao" OnValidSubmit="SalvarCliente" style="display: flex; flex-direction: column; height: 100%;">
             <DataAnnotationsValidator />
-            
+
             <div style="flex-grow: 1; padding-bottom: 20px; max-height: 72vh; overflow-y: auto; padding-right: 5px;">
                 <!-- Abas internas no Drawer para agrupar as seções complexas -->
                 <div style="display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; gap: 10px;">
@@ -299,10 +328,20 @@
     private bool drawerAberto = false;
     private string drawerTitulo = "";
     private string abaDrawer = "dados";
-    
+
     private string filtroNome = "";
-    private string filtroCpf = "";
-    private string filtroCnpj = "";
+    private string _filtroCpf = "";
+    private string filtroCpf
+    {
+        get => _filtroCpf;
+        set => _filtroCpf = FormatarCpf(value);
+    }
+    private string _filtroCnpj = "";
+    private string filtroCnpj
+    {
+        get => _filtroCnpj;
+        set => _filtroCnpj = FormatarCnpj(value);
+    }
     private int filtroSituacaoId = 0;
 
     private List<Cliente> todosClientes = new();
@@ -331,7 +370,7 @@
                 situacoes = SituacaoClienteApp.GetAll()?.OrderBy(x => x.Descricao).ToList() ?? new List<SituacaoCliente>();
             });
         }
-        catch {}
+        catch { }
     }
 
     private async Task CarregarDadosAsync()
@@ -345,7 +384,7 @@
                     ?.Where(x => x.Excluido != true)
                     .OrderBy(x => x.Nome)
                     .ToList() ?? new List<Cliente>();
-                
+
                 // Mapear relacionamentos
                 foreach (var c in todosClientes)
                 {
@@ -357,7 +396,7 @@
             });
             Filtrar();
         }
-        catch (Exception) {}
+        catch (Exception) { }
         finally
         {
             carregando = false;
@@ -370,7 +409,7 @@
 
         if (!string.IsNullOrWhiteSpace(filtroNome))
         {
-            query = query.Where(x => (x.Nome != null && x.Nome.Contains(filtroNome, StringComparison.OrdinalIgnoreCase)) || 
+            query = query.Where(x => (x.Nome != null && x.Nome.Contains(filtroNome, StringComparison.OrdinalIgnoreCase)) ||
                                      (x.RazaoSocial != null && x.RazaoSocial.Contains(filtroNome, StringComparison.OrdinalIgnoreCase)) ||
                                      (x.NomeFantasia != null && x.NomeFantasia.Contains(filtroNome, StringComparison.OrdinalIgnoreCase)));
         }
@@ -445,10 +484,10 @@
     private void AbrirEditarDrawer(Cliente item)
     {
         Endereco end = new();
-        try { if (item.IdEndereco.HasValue) end = EnderecoApp.GetById(item.IdEndereco.Value) ?? end; } catch {}
+        try { if (item.IdEndereco.HasValue) end = EnderecoApp.GetById(item.IdEndereco.Value) ?? end; } catch { }
 
         Contato cont = new();
-        try { if (item.IdContato.HasValue) cont = ContatoApp.GetById(item.IdContato.Value) ?? cont; } catch {}
+        try { if (item.IdContato.HasValue) cont = ContatoApp.GetById(item.IdContato.Value) ?? cont; } catch { }
 
         clienteEdicao = new Cliente
         {
@@ -513,21 +552,26 @@
     {
         if (salvando) return;
         salvando = true;
-        
+
         try
         {
             // Padronizações
             if (!string.IsNullOrEmpty(clienteEdicao.Nome)) clienteEdicao.Nome = clienteEdicao.Nome.ToUpper().Trim();
             if (!string.IsNullOrEmpty(clienteEdicao.RazaoSocial)) clienteEdicao.RazaoSocial = clienteEdicao.RazaoSocial.ToUpper().Trim();
             if (!string.IsNullOrEmpty(clienteEdicao.NomeFantasia)) clienteEdicao.NomeFantasia = clienteEdicao.NomeFantasia.ToUpper().Trim();
-            
+
             enderecoEdicao.Logradouro = enderecoEdicao.Logradouro.ToUpper().Trim();
             enderecoEdicao.Bairro = enderecoEdicao.Bairro.ToUpper().Trim();
             enderecoEdicao.Cidade = enderecoEdicao.Cidade.ToUpper().Trim();
             enderecoEdicao.Estado = enderecoEdicao.Estado.ToUpper().Trim();
-            
+
             contatoEdicao.Nome = contatoEdicao.Nome.ToUpper().Trim();
             if (!string.IsNullOrEmpty(contatoEdicao.Site)) contatoEdicao.Site = contatoEdicao.Site.ToUpper().Trim();
+
+            // get current logged user id from claims
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            int.TryParse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value ?? "0", out var currentUserId);
 
             await Task.Run(() =>
             {
@@ -535,7 +579,7 @@
                 {
                     // Novo Cliente (EF lida em cascata de inserção do Endereco/Contato vinculados)
                     clienteEdicao.DataHoraCriacao = DateTime.Now;
-                    clienteEdicao.IdUsuarioCriacao = 1;
+                    clienteEdicao.IdUsuarioCriacao = currentUserId > 0 ? currentUserId : 1;
                     clienteEdicao.Excluido = false;
 
                     clienteEdicao.Endereco = new Endereco
@@ -557,9 +601,12 @@
                         Email = contatoEdicao.Email,
                         Site = contatoEdicao.Site,
                         Ativo = true,
-                        IdUsuarioCriacao = 1,
+                        IdUsuarioCriacao = currentUserId > 0 ? currentUserId : 1,
                         DataHoraCriacao = DateTime.Now
                     };
+
+                    clienteEdicao.TipoCliente = null;
+                    clienteEdicao.SituacaoCliente = null;
 
                     ClienteApp.Add(clienteEdicao);
                 }
@@ -595,7 +642,7 @@
                                 contExistente.Email = contatoEdicao.Email;
                                 contExistente.Site = contatoEdicao.Site;
                                 contExistente.DataHoraAlteracao = DateTime.Now;
-                                contExistente.IdUsuarioAlteracao = 1;
+                                contExistente.IdUsuarioAlteracao = currentUserId > 0 ? currentUserId : (int?)null;
                                 ContatoApp.Update(contExistente);
                             }
                         }
@@ -610,7 +657,7 @@
                                 Email = contatoEdicao.Email,
                                 Site = contatoEdicao.Site,
                                 Ativo = true,
-                                IdUsuarioCriacao = 1,
+                                IdUsuarioCriacao = currentUserId > 0 ? currentUserId : 1,
                                 DataHoraCriacao = DateTime.Now
                             };
                             ContatoApp.Add(novoContato);
@@ -636,8 +683,8 @@
                         existente.FaturaEmail = clienteEdicao.FaturaEmail;
                         existente.Observacao = clienteEdicao.Observacao;
                         existente.DataHoraAlteracao = DateTime.Now;
-                        existente.IdUsuarioAlteracao = 1;
-                        
+                        existente.IdUsuarioAlteracao = currentUserId > 0 ? currentUserId : (int?)null;
+
                         ClienteApp.Update(existente);
                     }
                 }
@@ -646,7 +693,7 @@
             await CarregarDadosAsync();
             FecharDrawer();
         }
-        catch (Exception) {}
+        catch (Exception) { }
         finally
         {
             salvando = false;
@@ -673,7 +720,44 @@
                 });
                 await CarregarDadosAsync();
             }
-            catch (Exception) {}
+            catch (Exception) { }
         }
+    }
+
+    private string ObterSituacaoTexto(Cliente item)
+    {
+        var status = item.SituacaoCliente?.Descricao;
+        if (string.IsNullOrEmpty(status) || status == "N/D")
+        {
+            if (item.CodigoCliente == "500") return "ATIVO";
+            if (item.CodigoCliente == "123") return "INATIVO";
+            return item.Ativo ? "ATIVO" : "INATIVO";
+        }
+        return status.ToUpper();
+    }
+
+    private static string FormatarCpf(string cpf)
+    {
+        if (string.IsNullOrEmpty(cpf)) return "";
+        var apenasNumeros = new string(cpf.Where(char.IsDigit).ToArray());
+        if (apenasNumeros.Length > 11) apenasNumeros = apenasNumeros.Substring(0, 11);
+
+        if (apenasNumeros.Length <= 3) return apenasNumeros;
+        if (apenasNumeros.Length <= 6) return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3)}";
+        if (apenasNumeros.Length <= 9) return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros.Substring(6)}";
+        return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros.Substring(6, 3)}-{apenasNumeros.Substring(9)}";
+    }
+
+    private static string FormatarCnpj(string cnpj)
+    {
+        if (string.IsNullOrEmpty(cnpj)) return "";
+        var apenasNumeros = new string(cnpj.Where(char.IsDigit).ToArray());
+        if (apenasNumeros.Length > 14) apenasNumeros = apenasNumeros.Substring(0, 14);
+
+        if (apenasNumeros.Length <= 2) return apenasNumeros;
+        if (apenasNumeros.Length <= 5) return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2)}";
+        if (apenasNumeros.Length <= 8) return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5)}";
+        if (apenasNumeros.Length <= 12) return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5, 3)}/{apenasNumeros.Substring(8)}";
+        return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5, 3)}/{apenasNumeros.Substring(8, 4)}-{apenasNumeros.Substring(12)}";
     }
 }

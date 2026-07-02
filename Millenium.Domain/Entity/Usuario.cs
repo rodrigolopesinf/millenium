@@ -4,6 +4,7 @@ namespace Millenium.Domain.Entity
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
 
     [Table("Usuario")]
     public partial class Usuario
@@ -36,7 +37,7 @@ namespace Millenium.Domain.Entity
 
         public int IdNivel { get; set; }
 
-        public int IdCliente { get; set; }
+        public int? IdCliente { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -45,8 +46,13 @@ namespace Millenium.Domain.Entity
         [StringLength(50)]
         public string? Apelido { get; set; }
 
+        private string? _celular;
         [StringLength(15)]
-        public string? Celular { get; set; }
+        public string? Celular 
+        {
+            get => _celular;
+            set => _celular = FormatarTelefone(value);
+        }
 
         [StringLength(255)]
         public string? Email { get; set; }
@@ -136,5 +142,17 @@ namespace Millenium.Domain.Entity
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<TipoSolicitacao> TipoSolicitacao2 { get; set; }
+
+        private static string? FormatarTelefone(string? tel)
+        {
+            if (string.IsNullOrEmpty(tel)) return tel;
+            var apenasNumeros = new string(tel.Where(char.IsDigit).ToArray());
+            if (apenasNumeros.Length > 11) apenasNumeros = apenasNumeros.Substring(0, 11);
+
+            if (apenasNumeros.Length <= 2) return apenasNumeros;
+            if (apenasNumeros.Length <= 6) return $"({apenasNumeros.Substring(0, 2)}) {apenasNumeros.Substring(2)}";
+            if (apenasNumeros.Length <= 10) return $"({apenasNumeros.Substring(0, 2)}) {apenasNumeros.Substring(2, 4)}-{apenasNumeros.Substring(6)}";
+            return $"({apenasNumeros.Substring(0, 2)}) {apenasNumeros.Substring(2, 5)}-{apenasNumeros.Substring(7)}";
+        }
     }
 }

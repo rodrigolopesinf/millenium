@@ -22,7 +22,7 @@
                style="padding-left: @(!string.IsNullOrEmpty(Icon) ? "36px" : "12px"); border-radius: var(--radius-md); border-color: @(HasValidationError ? "#ef4444" : "var(--border-color)"); transition: all 0.2s;"
                placeholder="@Placeholder"
                value="@CurrentValue"
-               @oninput="OnInputChanged"
+               @onchange="OnInputChanged"
                disabled="@Disabled"
                maxlength="@Maxlength"
                required="@Required"

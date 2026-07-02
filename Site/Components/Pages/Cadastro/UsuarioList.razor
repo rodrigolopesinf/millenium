@@ -27,28 +27,30 @@
             </button>
         </div>
         
-        <div class="row">
-            <div class="form-group col-md-5">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Nome</label>
-                <input type="text" @bind="filtroNome" @bind:event="oninput" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="Buscar por nome..." style="border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" />
+        <form @onsubmit="Filtrar" style="margin: 0; padding: 0;">
+            <div class="row">
+                <div class="form-group col-md-5">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Nome</label>
+                    <input type="text" @bind="filtroNome" @onkeyup="HandleFiltroEnter" class="form-control" placeholder="Buscar por nome..." style="border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Ativo</label>
+                    <select class="form-control" @bind="filtroAtivo" style="border-radius: var(--radius-md); border-color: var(--border-color);">
+                        <option value="todos">Todos</option>
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
+                    <button type="submit" class="btn btn-primary" title="Buscar registros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md);">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" @onclick="LimparFiltros" title="Limpar filtros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border-color: var(--border-color);">
+                        <i class="fa fa-rotate-left"></i>
+                    </button>
+                </div>
             </div>
-            <div class="form-group col-md-3">
-                <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Ativo</label>
-                <select class="form-control" @bind="filtroAtivo" style="border-radius: var(--radius-md); border-color: var(--border-color);">
-                    <option value="todos">Todos</option>
-                    <option value="true">Sim</option>
-                    <option value="false">Não</option>
-                </select>
-            </div>
-            <div class="form-group col-md-4" style="display: flex; align-items: flex-end; justify-content: flex-start; gap: 8px; height: 59px;">
-                <button class="btn btn-primary" @onclick="Filtrar" title="Buscar registros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md);">
-                    <i class="fa fa-search"></i>
-                </button>
-                <button class="btn btn-default" @onclick="LimparFiltros" title="Limpar filtros" style="height: 38px; width: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border-color: var(--border-color);">
-                    <i class="fa fa-rotate-left"></i>
-                </button>
-            </div>
-        </div>
+        </form>
     </div>
 
     <!-- Tabela de Resultados -->
@@ -90,8 +92,8 @@
                     </button>
                 </td>
                 <td style="text-align: center; padding: 14px 16px;">
-                    <button class="btn btn-link text-danger" @onclick="() => ConfirmarExclusao(item)" style="padding: 0; border: none; background: transparent;" title="Excluir">
-                        <i class="fa fa-trash" style="font-size: 16px;"></i>
+                    <button class="btn btn-link" @onclick="() => ConfirmarExclusao(item)" style="color: var(--primary-color); padding: 0; border: none; background: transparent;" title="Excluir">
+                        <i class="fa fa-trash-o" style="font-size: 16px;"></i>
                     </button>
                 </td>
             </RowTemplate>
@@ -102,7 +104,7 @@
 <!-- Drawer de Cadastro / Edição -->
 <MilleniumDrawer @bind-IsOpen="drawerAberto" Title="@drawerTitulo" Size="md">
     <ChildContent>
-        <EditForm Model="usuarioEdicao" OnValidSubmit="SalvarUsuario" style="display: flex; flex-direction: column; height: 100%;">
+        <EditForm Model="usuarioEdicao" OnSubmit="HandleSubmit" style="display: flex; flex-direction: column; height: 100%;">
             <DataAnnotationsValidator />
             
             <div style="flex-grow: 1; padding-bottom: 20px; max-height: 70vh; overflow-y: auto; padding-right: 5px;">
@@ -216,6 +218,7 @@
     private Usuario usuarioEdicao = new();
     private bool usuarioEdicaoAtivo = true;
     private string senhaUI = "";
+    private bool enviarEmailReset = false;
     private bool senhaExpiraUI = false;
     private DateTime validadeSenhaUI = DateTime.Now.AddDays(90);
 
@@ -300,6 +303,7 @@
     private void ResetarSenhaUI()
     {
         senhaUI = "123456";
+        enviarEmailReset = true;
     }
 
     private void AbrirNovoDrawer()
@@ -307,6 +311,7 @@
         usuarioEdicao = new Usuario { Ativo = true, Nome = "", Login = "", Senha = "" };
         usuarioEdicaoAtivo = true;
         senhaUI = "";
+        enviarEmailReset = false;
         senhaExpiraUI = false;
         validadeSenhaUI = DateTime.Now.AddDays(90);
         drawerTitulo = "Novo Usuário";
@@ -336,6 +341,7 @@
         };
         usuarioEdicaoAtivo = item.Ativo;
         senhaUI = senhaDescripto;
+        enviarEmailReset = false;
         senhaExpiraUI = item.ValidadeSenha.HasValue;
         validadeSenhaUI = item.ValidadeSenha ?? DateTime.Now.AddDays(90);
         drawerTitulo = "Editar Usuário";
@@ -359,6 +365,11 @@
                 usuarioEdicao.Apelido = usuarioEdicao.Apelido.ToUpper().Trim();
             
             usuarioEdicao.Ativo = usuarioEdicaoAtivo;
+            
+            if (usuarioEdicao.IdNivel != 3)
+            {
+                usuarioEdicao.IdCliente = null;
+            }
             
             if (senhaExpiraUI)
                 usuarioEdicao.ValidadeSenha = validadeSenhaUI;
@@ -397,6 +408,15 @@
                         existente.DataHoraAlteracao = DateTime.Now;
                         existente.IdUsuarioAlteracao = 1;
                         UsuarioApp.Update(existente);
+
+                        if (enviarEmailReset)
+                        {
+                            try
+                            {
+                                new Millenium.Infra.Data.Email.Email(existente, "123456");
+                            }
+                            catch {}
+                        }
                     }
                 }
             });
@@ -432,6 +452,32 @@
                 await CarregarDadosAsync();
             }
             catch (Exception) {}
+        }
+    }
+
+    private async Task HandleSubmit(EditContext editContext)
+    {
+        var senhaOriginal = usuarioEdicao.Senha;
+        
+        // Se for novo registro e não houver senha digitada, impede a submissão
+        if (usuarioEdicao.IdUsuario == 0 && string.IsNullOrEmpty(senhaUI))
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(senhaUI))
+        {
+            usuarioEdicao.Senha = senhaUI; // Atribui temporariamente para passar no validador
+        }
+
+        if (editContext.Validate())
+        {
+            usuarioEdicao.Senha = senhaOriginal; // Restaura para que o SalvarUsuario criptografe corretamente
+            await SalvarUsuario();
+        }
+        else
+        {
+            usuarioEdicao.Senha = senhaOriginal;
         }
     }
 }

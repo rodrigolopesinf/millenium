@@ -155,7 +155,9 @@ app.MapPost("/api/auth/login", async (
     var claims = new List<Claim>
     {
         new Claim(ClaimTypes.Name, response.Usuario.Nome),
-        new Claim(ClaimTypes.Role, roles)
+        new Claim(ClaimTypes.Role, roles),
+        new Claim(ClaimTypes.NameIdentifier, userId),
+        new Claim("sub", userId)
     };
 
     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

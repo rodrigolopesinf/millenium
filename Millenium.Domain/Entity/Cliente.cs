@@ -4,13 +4,14 @@ namespace Millenium.Domain.Entity
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
 
     [Table("Cliente")]
     public partial class Cliente
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Cliente()
-        {            
+        {
             Endereco = new Endereco();
             Contato = new Contato();
             SituacaoCliente = new SituacaoCliente();
@@ -38,21 +39,41 @@ namespace Millenium.Domain.Entity
         [StringLength(50)]
         public string? Nome { get; set; }
 
+        private string? _cpf;
         [StringLength(15)]
-        public string? Cpf { get; set; }
+        public string? Cpf 
+        {
+            get => _cpf;
+            set => _cpf = FormatarCpf(value);
+        }
 
+        private string? _cnpj;
         [StringLength(18)]
-        public string? Cnpj { get; set; }
+        public string? Cnpj 
+        {
+            get => _cnpj;
+            set => _cnpj = FormatarCnpj(value);
+        }
 
+        private string _telefonePrincipal = "";
         [Required]
         [StringLength(15)]
-        public string TelefonePrincipal { get; set; }
+        public string TelefonePrincipal 
+        {
+            get => _telefonePrincipal;
+            set => _telefonePrincipal = FormatarTelefone(value) ?? "";
+        }
 
         [StringLength(5)]
         public string? RamalPrincipal { get; set; }
 
+        private string? _telefoneSecundario;
         [StringLength(15)]
-        public string? TelefoneSecundario { get; set; }
+        public string? TelefoneSecundario 
+        {
+            get => _telefoneSecundario;
+            set => _telefoneSecundario = FormatarTelefone(value);
+        }
 
         [StringLength(5)]
         public string? RamalSecundario { get; set; }
@@ -110,5 +131,42 @@ namespace Millenium.Domain.Entity
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Faturamento> Faturamento { get; set; }
+
+        private static string? FormatarCpf(string? cpf)
+        {
+            if (string.IsNullOrEmpty(cpf)) return cpf;
+            var apenasNumeros = new string(cpf.Where(char.IsDigit).ToArray());
+            if (apenasNumeros.Length > 11) apenasNumeros = apenasNumeros.Substring(0, 11);
+
+            if (apenasNumeros.Length <= 3) return apenasNumeros;
+            if (apenasNumeros.Length <= 6) return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3)}";
+            if (apenasNumeros.Length <= 9) return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros.Substring(6)}";
+            return $"{apenasNumeros.Substring(0, 3)}.{apenasNumeros.Substring(3, 3)}.{apenasNumeros.Substring(6, 3)}-{apenasNumeros.Substring(9)}";
+        }
+
+        private static string? FormatarCnpj(string? cnpj)
+        {
+            if (string.IsNullOrEmpty(cnpj)) return cnpj;
+            var apenasNumeros = new string(cnpj.Where(char.IsDigit).ToArray());
+            if (apenasNumeros.Length > 14) apenasNumeros = apenasNumeros.Substring(0, 14);
+
+            if (apenasNumeros.Length <= 2) return apenasNumeros;
+            if (apenasNumeros.Length <= 5) return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2)}";
+            if (apenasNumeros.Length <= 8) return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5)}";
+            if (apenasNumeros.Length <= 12) return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5, 3)}/{apenasNumeros.Substring(8)}";
+            return $"{apenasNumeros.Substring(0, 2)}.{apenasNumeros.Substring(2, 3)}.{apenasNumeros.Substring(5, 3)}/{apenasNumeros.Substring(8, 4)}-{apenasNumeros.Substring(12)}";
+        }
+
+        private static string? FormatarTelefone(string? tel)
+        {
+            if (string.IsNullOrEmpty(tel)) return tel;
+            var apenasNumeros = new string(tel.Where(char.IsDigit).ToArray());
+            if (apenasNumeros.Length > 11) apenasNumeros = apenasNumeros.Substring(0, 11);
+
+            if (apenasNumeros.Length <= 2) return apenasNumeros;
+            if (apenasNumeros.Length <= 6) return $"({apenasNumeros.Substring(0, 2)}) {apenasNumeros.Substring(2)}";
+            if (apenasNumeros.Length <= 10) return $"({apenasNumeros.Substring(0, 2)}) {apenasNumeros.Substring(2, 4)}-{apenasNumeros.Substring(6)}";
+            return $"({apenasNumeros.Substring(0, 2)}) {apenasNumeros.Substring(2, 5)}-{apenasNumeros.Substring(7)}";
+        }
     }
 }

@@ -315,7 +315,7 @@
                 // Se for cliente (nível 3), limita apenas para o cliente dele
                 if (nivelUsuario == 3 && usuarioLogado != null)
                 {
-                    filtroClienteId = usuarioLogado.IdCliente;
+                    filtroClienteId = usuarioLogado.IdCliente ?? 0;
                 }
             }
 
@@ -323,7 +323,7 @@
             {
                 if (nivelUsuario == 3 && usuarioLogado != null)
                 {
-                    var c = ClienteApp.GetById(usuarioLogado.IdCliente);
+                    var c = ClienteApp.GetById(usuarioLogado.IdCliente ?? 0);
                     if (c != null) clientes = new List<Cliente> { c };
                 }
                 else
