@@ -4,6 +4,8 @@
 @inject INivelAppService NivelApp
 @inject IClienteAppService ClienteApp
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @using Millenium.Domain.Entity
 @using Millenium.Util
 
@@ -87,14 +89,28 @@
                     }
                 </td>
                 <td style="text-align: center; padding: 14px 16px;">
-                    <button class="btn btn-link" @onclick="() => AbrirEditarDrawer(item)" style="color: var(--primary-color); padding: 0; border: none; background: transparent;" title="Editar">
-                        <i class="fa fa-edit" style="font-size: 16px;"></i>
-                    </button>
+                    @if (nivelUsuario == 2 && item.IdNivel == 2)
+                    {
+                        <i class="fa fa-lock" style="font-size: 16px; color: var(--text-muted);" title="Bloqueado para Operadores"></i>
+                    }
+                    else
+                    {
+                        <button class="btn btn-link" @onclick="() => AbrirEditarDrawer(item)" style="color: var(--primary-color); padding: 0; border: none; background: transparent;" title="Editar">
+                            <i class="fa fa-edit" style="font-size: 16px;"></i>
+                        </button>
+                    }
                 </td>
                 <td style="text-align: center; padding: 14px 16px;">
-                    <button class="btn btn-link" @onclick="() => ConfirmarExclusao(item)" style="color: var(--primary-color); padding: 0; border: none; background: transparent;" title="Excluir">
-                        <i class="fa fa-trash-o" style="font-size: 16px;"></i>
-                    </button>
+                    @if (nivelUsuario == 2 && item.IdNivel == 2)
+                    {
+                        <i class="fa fa-lock" style="font-size: 16px; color: var(--text-muted);" title="Bloqueado para Operadores"></i>
+                    }
+                    else
+                    {
+                        <button class="btn btn-link" @onclick="() => ConfirmarExclusao(item)" style="color: var(--primary-color); padding: 0; border: none; background: transparent;" title="Excluir">
+                            <i class="fa fa-trash-o" style="font-size: 16px;"></i>
+                        </button>
+                    }
                 </td>
             </RowTemplate>
         </MilleniumTable>
@@ -221,6 +237,8 @@
     private bool enviarEmailReset = false;
     private bool senhaExpiraUI = false;
     private DateTime validadeSenhaUI = DateTime.Now.AddDays(90);
+    private int nivelUsuario = 0;
+    private Usuario? usuarioLogado;
 
     protected override async Task OnInitializedAsync()
     {
@@ -232,9 +250,23 @@
     {
         try
         {
+            var userName = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+            int currentNivel = 0;
+            if (!string.IsNullOrEmpty(userName))
+            {
+                var usr = UsuarioApp.ObterUsuarioPeloNome(userName);
+                currentNivel = usr?.IdNivel ?? 0;
+            }
+
             await Task.Run(() =>
             {
-                niveis = NivelApp.GetAll()?.OrderBy(x => x.Descricao).ToList() ?? new List<Nivel>();
+                var listNiveis = NivelApp.GetAll()?.OrderBy(x => x.Descricao).ToList() ?? new List<Nivel>();
+                if (currentNivel == 2)
+                {
+                    listNiveis = listNiveis.Where(x => x.IdNivel != 2).ToList();
+                }
+                niveis = listNiveis;
+
                 clientes = ClienteApp.GetAll()?.Where(x => x.Excluido != true && x.Ativo).OrderBy(x => x.Nome).ToList() ?? new List<Cliente>();
             });
         }
@@ -246,11 +278,23 @@
         carregando = true;
         try
         {
+            var userName = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(userName))
+            {
+                usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(userName);
+                nivelUsuario = usuarioLogado?.IdNivel ?? 0;
+                
+                if (nivelUsuario == 3)
+                {
+                    NavigationManager.NavigateTo("/Blazor/Solicitacao");
+                    return;
+                }
+            }
+
             await Task.Run(() =>
             {
                 todosUsuarios = UsuarioApp.GetAll()
                     ?.Where(x => x.Excluido != true)
-                    .OrderBy(x => x.Nome)
                     .ToList() ?? new List<Usuario>();
             });
             Filtrar();
@@ -433,6 +477,12 @@
 
     private async Task ConfirmarExclusao(Usuario item)
     {
+        if (nivelUsuario == 2 && item.IdNivel == 2)
+        {
+            await JS.InvokeVoidAsync("alert", "Operadores não possuem permissão para excluir outros Operadores.");
+            return;
+        }
+
         bool confirmado = await JS.InvokeAsync<bool>("confirm", $"Deseja realmente excluir o usuário '{item.Nome}'?");
         if (confirmado)
         {
@@ -457,6 +507,12 @@
 
     private async Task HandleSubmit(EditContext editContext)
     {
+        if (nivelUsuario == 2 && usuarioEdicao.IdNivel == 2)
+        {
+            await JS.InvokeVoidAsync("alert", "Operadores não possuem permissão para habilitar/gerenciar outros Operadores.");
+            return;
+        }
+
         var senhaOriginal = usuarioEdicao.Senha;
         
         // Se for novo registro e não houver senha digitada, impede a submissão

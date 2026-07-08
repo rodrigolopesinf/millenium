@@ -25,9 +25,9 @@ namespace Millenium.Application.Services
             return _usuarioService.AutenticarUsuario(_usuarioService.GetAll(), login, senha);
         }
 
-        public Usuario ObterUsuarioLogin(string login)
+        public Usuario ObterUsuarioPeloNome(string nome)
         {
-            return _usuarioService.ObterUsuarioLogin(_usuarioService.GetAll(), login);
+            return _usuarioService.ObterUsuarioLogin(_usuarioService.GetAll(), nome);
         }
     }
 }

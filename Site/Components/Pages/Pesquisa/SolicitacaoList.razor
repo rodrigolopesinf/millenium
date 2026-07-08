@@ -323,10 +323,10 @@
         try
         {
             // Obter usuário logado para aplicar permissões
-            var userLogin = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
-            if (!string.IsNullOrEmpty(userLogin))
+            var userName = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(userName))
             {
-                usuarioLogado = UsuarioApp.ObterUsuarioLogin(userLogin);
+                usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(userName);
                 nivelUsuario = usuarioLogado?.IdNivel ?? 0;
             }
 

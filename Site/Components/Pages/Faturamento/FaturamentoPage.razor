@@ -7,6 +7,7 @@
 @inject IUsuarioAppService UsuarioApp
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
 @inject Millenium.Infra.Data.Contexto.ContextMillenium Contexto
 @using Millenium.Domain.Entity
 @using Microsoft.EntityFrameworkCore
@@ -306,16 +307,17 @@
         try
         {
             // Obter usuário logado para aplicar permissões
-            var userLogin = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
-            if (!string.IsNullOrEmpty(userLogin))
+            var userName = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(userName))
             {
-                usuarioLogado = UsuarioApp.ObterUsuarioLogin(userLogin);
+                usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(userName);
                 nivelUsuario = usuarioLogado?.IdNivel ?? 0;
                 
-                // Se for cliente (nível 3), limita apenas para o cliente dele
-                if (nivelUsuario == 3 && usuarioLogado != null)
+                // Gestor não tem acesso ao Faturamento
+                if (nivelUsuario == 3)
                 {
-                    filtroClienteId = usuarioLogado.IdCliente ?? 0;
+                    NavigationManager.NavigateTo("/Blazor/Solicitacao");
+                    return;
                 }
             }
 

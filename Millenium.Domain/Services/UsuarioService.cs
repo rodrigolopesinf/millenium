@@ -24,12 +24,12 @@ namespace Millenium.Domain.Services
 
         public Usuario AutenticarUsuario(IEnumerable<Usuario> usuarios, string login, string senha)
         {
-            return usuarios.Where(u => u.Login == login && u.Senha == Md5Crypt.Criptografar(senha)).FirstOrDefault();
+            return usuarios.Where(u => u.Login == login && u.Senha == Md5Crypt.Criptografar(senha) && u.Ativo == true && u.Excluido != true).FirstOrDefault();
         }
 
-        public Usuario ObterUsuarioLogin(IEnumerable<Usuario> usuarios, string login)
+        public Usuario ObterUsuarioLogin(IEnumerable<Usuario> usuarios, string nome)
         {
-            return usuarios.Where(u => u.Login == login.ToUpper()).FirstOrDefault();
+            return usuarios.Where(u => u.Nome == nome.ToUpper()).FirstOrDefault();
         }
     }
 }

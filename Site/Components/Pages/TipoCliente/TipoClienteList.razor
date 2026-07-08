@@ -1,7 +1,10 @@
 @page "/Blazor/TipoCliente"
 @attribute [Authorize]
 @inject ITipoClienteAppService TipoClienteApp
+@inject IUsuarioAppService UsuarioApp
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @using Millenium.Domain.Entity
 
 <PageTitle>Tipo de Cliente - Millenium</PageTitle>
@@ -140,6 +143,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var userName = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+        if (!string.IsNullOrEmpty(userName))
+        {
+            var usr = UsuarioApp.ObterUsuarioPeloNome(userName);
+            if (usr?.IdNivel == 3)
+            {
+                NavigationManager.NavigateTo("/Blazor/Solicitacao");
+                return;
+            }
+        }
+
         await CarregarDadosAsync();
     }
 

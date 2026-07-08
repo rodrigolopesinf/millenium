@@ -5,8 +5,11 @@
 @inject ISituacaoClienteAppService SituacaoClienteApp
 @inject IEnderecoAppService EnderecoApp
 @inject IContatoAppService ContatoApp
+@inject IUsuarioAppService UsuarioApp
 @inject IJSRuntime JS
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @using Millenium.Domain.Entity
 @using System.Security.Claims
 
@@ -356,6 +359,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var userLogin = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+        if (!string.IsNullOrEmpty(userLogin))
+        {
+            var usr = UsuarioApp.ObterUsuarioPeloNome(userLogin);
+            if (usr?.IdNivel == 3)
+            {
+                NavigationManager.NavigateTo("/Blazor/Solicitacao");
+                return;
+            }
+        }
+
         await CarregarDropdownsAsync();
         await CarregarDadosAsync();
     }

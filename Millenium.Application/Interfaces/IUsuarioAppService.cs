@@ -7,7 +7,7 @@ namespace Millenium.Application.Interfaces
     {
         IEnumerable<Usuario> ObterUsuariosAtivos();
         Usuario AutenticarUsuario(string login, string senha);
-        Usuario ObterUsuarioLogin(string login);
+        Usuario ObterUsuarioPeloNome(string login);
     }
 }
 

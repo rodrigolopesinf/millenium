@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject IUsuarioAppService UsuarioApp
 
 <HeadContent>
     <link href="/css/painel-moderno.css" rel="stylesheet" type="text/css" asp-append-version="true" />
@@ -82,33 +83,36 @@
                         </a>
                     </li>
 
-                    <!-- Seção CADASTROS -->
-                    <li class="menu-section-header-custom">Cadastros</li>
-                    <li class="treeview @(cadastroMenuOpen ? "active" : "")">
-                        <a href="javascript:;" @onclick="ToggleCadastroMenu" @onclick:stopPropagation style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <span>
-                                <i class="fa fa-edit" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
-                                <span>Cadastros de Apoio</span>
-                            </span>
-                            <i class="fa @(cadastroMenuOpen ? "fa-angle-down" : "fa-angle-left")" style="font-size: 14px;"></i>
-                        </a>
-                        
-                        <!-- Submenu Sanfona (Nativo Blazor) -->
-                        <ul class="treeview-menu" style="display: @(cadastroMenuOpen ? "block" : "none"); list-style: none;">
-                            <li class="@(isActive("/Blazor/Cliente") ? "active" : "")">
-                                <a href="/Blazor/Cliente">Clientes</a>
-                            </li>
-                            <li class="@(isActive("/Blazor/TipoCliente") ? "active" : "")">
-                                <a href="/Blazor/TipoCliente">Tipo de Cliente</a>
-                            </li>
-                            <li class="@(isActive("/Blazor/TipoSolicitacao") ? "active" : "")">
-                                <a href="/Blazor/TipoSolicitacao">Tipo de Solicitação</a>
-                            </li>
-                            <li class="@(isActive("/Blazor/Usuario") ? "active" : "")">
-                                <a href="/Blazor/Usuario">Usuários</a>
-                            </li>
-                        </ul>
-                    </li>
+                    @if (nivelUsuario != 3)
+                    {
+                        <!-- Seção CADASTROS -->
+                        <li class="menu-section-header-custom">Cadastros</li>
+                        <li class="treeview @(cadastroMenuOpen ? "active" : "")">
+                            <a href="javascript:;" @onclick="ToggleCadastroMenu" @onclick:stopPropagation style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span>
+                                    <i class="fa fa-edit" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                                    <span>Cadastros de Apoio</span>
+                                </span>
+                                <i class="fa @(cadastroMenuOpen ? "fa-angle-down" : "fa-angle-left")" style="font-size: 14px;"></i>
+                            </a>
+                            
+                            <!-- Submenu Sanfona (Nativo Blazor) -->
+                            <ul class="treeview-menu" style="display: @(cadastroMenuOpen ? "block" : "none"); list-style: none;">
+                                <li class="@(isActive("/Blazor/Cliente") ? "active" : "")">
+                                    <a href="/Blazor/Cliente">Clientes</a>
+                                </li>
+                                <li class="@(isActive("/Blazor/TipoCliente") ? "active" : "")">
+                                    <a href="/Blazor/TipoCliente">Tipo de Cliente</a>
+                                </li>
+                                <li class="@(isActive("/Blazor/TipoSolicitacao") ? "active" : "")">
+                                    <a href="/Blazor/TipoSolicitacao">Tipo de Solicitação</a>
+                                </li>
+                                <li class="@(isActive("/Blazor/Usuario") ? "active" : "")">
+                                    <a href="/Blazor/Usuario">Usuários</a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
 
                     <!-- Seção SOLICITAÇÕES -->
                     <li class="menu-section-header-custom">Solicitações</li>
@@ -119,14 +123,17 @@
                         </a>
                     </li>
 
-                    <!-- Seção FATURAMENTO -->
-                    <li class="menu-section-header-custom">Faturamento</li>
-                    <li class="@(isActive("/Blazor/Faturamento") ? "active" : "")">
-                        <a href="/Blazor/Faturamento">
-                            <i class="fa fa-bar-chart-o" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
-                            <span>Gerar</span>
-                        </a>
-                    </li>
+                    @if (nivelUsuario != 3)
+                    {
+                        <!-- Seção FATURAMENTO -->
+                        <li class="menu-section-header-custom">Faturamento</li>
+                        <li class="@(isActive("/Blazor/Faturamento") ? "active" : "")">
+                            <a href="/Blazor/Faturamento">
+                                <i class="fa fa-bar-chart-o" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                                <span>Gerar</span>
+                            </a>
+                        </li>
+                    }
                 </ul>
             </section>
         </aside>
@@ -219,6 +226,7 @@
 @code {
     private string usuarioNome = "ADMINISTRADOR";
     private string usuarioPrimeiraLetra = "A";
+    private int nivelUsuario = 0;
     private bool sidebarCollapsed = false;
     private bool userDropdownOpen = false;
     private bool cadastroMenuOpen = false;
@@ -232,6 +240,10 @@
             if (user?.Identity?.IsAuthenticated == true)
             {
                 usuarioNome = user.Identity.Name?.ToUpper() ?? "ADMINISTRADOR";
+                
+                var usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(user.Identity.Name);
+                nivelUsuario = usuarioLogado?.IdNivel ?? 0;
+
                 if (!string.IsNullOrEmpty(usuarioNome))
                 {
                     // Pega o primeiro nome se for muito longo
