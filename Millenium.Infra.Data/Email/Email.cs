@@ -1,4 +1,4 @@
-﻿using Millenium.Domain.Entity;
+using Millenium.Domain.Entity;
 using System;
 using System.Net;
 using System.Net.Mail;
@@ -17,6 +17,11 @@ namespace Millenium.Infra.Data.Email
         public Email(Usuario usuario, string novaSenha)
         {
             EnviarEmail(usuario, novaSenha);
+        }
+
+        public Email(string de, string deNome, string para, string assunto, string mensagem)
+        {
+            EnviarEmail(de, deNome, para, assunto, mensagem);
         }
 
         private void EnviarEmail(Solicitacao solicitacao, string emailEnvio, string assunto, string mensagem)
@@ -58,6 +63,30 @@ namespace Millenium.Infra.Data.Email
                 sc.Host = "mail.milleniumpesquisas.com.br";
                 sc.Port = 25;
                 sc.Credentials = new NetworkCredential("suporte@milleniumpesquisas.com.br", "Fiesta@1991");
+                sc.EnableSsl = false;
+                sc.Send(m);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        private void EnviarEmail(string de, string deNome, string para, string assunto, string mensagem)
+        {
+            try
+            {
+                MailMessage m = new MailMessage();
+                SmtpClient sc = new SmtpClient();
+                m.From = new MailAddress("pesquisa@milleniumpesquisas.com.br", deNome);
+                m.ReplyToList.Add(new MailAddress(de, deNome));
+                m.To.Add(new MailAddress(para));
+                m.Subject = assunto;
+                m.Body = mensagem;                    
+                m.IsBodyHtml = true;
+                sc.Host = "mail.milleniumpesquisas.com.br";
+                sc.Port = 25;
+                sc.Credentials = new NetworkCredential("pesquisa@milleniumpesquisas.com.br", "Fiesta@1991");
                 sc.EnableSsl = false;
                 sc.Send(m);
             }

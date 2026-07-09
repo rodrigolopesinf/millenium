@@ -1,6 +1,9 @@
 @page "/"
 @layout Layout.LandingLayout
 @attribute [AllowAnonymous]
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Web
+@using Millenium.Infra.Data.Email
 
 <PageTitle>Inteligência Cadastral e Pesquisas Seguras - Millenium</PageTitle>
 
@@ -459,7 +462,7 @@
                 @if (exibirMensagemErro)
                 {
                     <div class="alert alert-danger" style="border-radius: var(--radius-md); margin-bottom: 20px; font-weight: 500;">
-                        Por favor, preencha todos os campos do formulário.
+                        @mensagemErroTexto
                     </div>
                 }
     
@@ -500,27 +503,70 @@
     private ContatoForm contatoModel = new ContatoForm();
     private bool exibirMensagemSucesso = false;
     private bool exibirMensagemErro = false;
+    private string mensagemErroTexto = "Por favor, preencha todos os campos do formulário.";
 
     private void SelecionarAba(string tabId)
     {
         abaAtiva = tabId;
     }
 
-    private void SubmeterContato()
+    private async Task SubmeterContato()
     {
         if (string.IsNullOrWhiteSpace(contatoModel.Nome) || 
             string.IsNullOrWhiteSpace(contatoModel.Email) || 
             string.IsNullOrWhiteSpace(contatoModel.Assunto) || 
             string.IsNullOrWhiteSpace(contatoModel.Mensagem))
         {
+            mensagemErroTexto = "Por favor, preencha todos os campos do formulário.";
             exibirMensagemErro = true;
             exibirMensagemSucesso = false;
             return;
         }
 
-        exibirMensagemSucesso = true;
         exibirMensagemErro = false;
-        contatoModel = new ContatoForm(); // Limpa formulário
+        exibirMensagemSucesso = false;
+
+        // Armazena temporariamente os valores para o envio do e-mail
+        var nome = contatoModel.Nome;
+        var email = contatoModel.Email;
+        var assunto = contatoModel.Assunto;
+        var mensagem = contatoModel.Mensagem;
+
+        // Limpa os campos do formulário de imediato na UI para uma melhor UX
+        contatoModel = new ContatoForm();
+
+        try
+        {
+            // Monta o corpo do email em HTML formatado e limpo
+            string corpoEmail = $@"
+                <h3>Nova mensagem de contato recebida do site</h3>
+                <p><strong>Nome Completo:</strong> {nome}</p>
+                <p><strong>E-mail Corporativo:</strong> {email}</p>
+                <p><strong>Assunto de Interesse:</strong> {assunto}</p>
+                <p><strong>Mensagem:</strong></p>
+                <p style='white-space: pre-line; background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; color: #334155;'>{mensagem}</p>
+            ";
+
+            // Envia em background (assíncrono) para não travar o circuito do Blazor com o timeout do SMTP síncrono
+            await Task.Run(() =>
+            {
+                new Email(
+                    de: email,
+                    deNome: nome,
+                    para: "consulta.cadastral@millecad.com.br",
+                    assunto: $"[Fale Conosco] {assunto}",
+                    mensagem: corpoEmail
+                );
+            });
+
+            exibirMensagemSucesso = true;
+        }
+        catch (Exception ex)
+        {
+            // Captura o erro real do SMTP e exibe na tela para testes claros
+            mensagemErroTexto = $"Falha de conexão com o servidor de e-mail (SMTP). Detalhes: {ex.Message}";
+            exibirMensagemErro = true;
+        }
     }
 
     public class ContatoForm
