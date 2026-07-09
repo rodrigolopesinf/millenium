@@ -154,8 +154,8 @@
 
                     <div class="form-group col-md-6" style="margin-bottom: 15px;">
                         <label style="font-weight: 600; font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px;">Cliente</label>
-                        <select class="form-control" @bind="usuarioEdicao.IdCliente" required="@(usuarioEdicao.IdNivel == 3)" style="border-radius: var(--radius-md); border-color: var(--border-color); height: 42px;">
-                            <option value="">SELECIONE</option>
+                        <select class="form-control" @bind="selectedClienteId" required="@(usuarioEdicao.IdNivel == 3)" style="border-radius: var(--radius-md); border-color: var(--border-color); height: 42px;">
+                            <option value="0">SELECIONE</option>
                             @foreach (var c in clientes)
                             {
                                 <option value="@c.IdCliente">@c.CodigoCliente - @(c.Cnpj != null ? c.NomeFantasia : c.Nome)</option>
@@ -239,6 +239,7 @@
     private DateTime validadeSenhaUI = DateTime.Now.AddDays(90);
     private int nivelUsuario = 0;
     private Usuario? usuarioLogado;
+    private int selectedClienteId = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -263,7 +264,7 @@
                 var listNiveis = NivelApp.GetAll()?.OrderBy(x => x.Descricao).ToList() ?? new List<Nivel>();
                 if (currentNivel == 2)
                 {
-                    listNiveis = listNiveis.Where(x => x.IdNivel != 2).ToList();
+                    listNiveis = listNiveis.Where(x => x.IdNivel == 3).ToList();
                 }
                 niveis = listNiveis;
 
@@ -293,9 +294,12 @@
 
             await Task.Run(() =>
             {
-                todosUsuarios = UsuarioApp.GetAll()
-                    ?.Where(x => x.Excluido != true)
-                    .ToList() ?? new List<Usuario>();
+                var query = UsuarioApp.GetAll()?.Where(x => x.Excluido != true);
+                if (nivelUsuario == 2)
+                {
+                    query = query?.Where(x => x.IdNivel == 3);
+                }
+                todosUsuarios = query?.ToList() ?? new List<Usuario>();
             });
             Filtrar();
         }
@@ -353,6 +357,7 @@
     private void AbrirNovoDrawer()
     {
         usuarioEdicao = new Usuario { Ativo = true, Nome = "", Login = "", Senha = "" };
+        selectedClienteId = 0;
         usuarioEdicaoAtivo = true;
         senhaUI = "";
         enviarEmailReset = false;
@@ -383,6 +388,7 @@
             DataHoraCriacao = item.DataHoraCriacao,
             IdUsuarioCriacao = item.IdUsuarioCriacao
         };
+        selectedClienteId = item.IdCliente ?? 0;
         usuarioEdicaoAtivo = item.Ativo;
         senhaUI = senhaDescripto;
         enviarEmailReset = false;
@@ -409,11 +415,7 @@
                 usuarioEdicao.Apelido = usuarioEdicao.Apelido.ToUpper().Trim();
             
             usuarioEdicao.Ativo = usuarioEdicaoAtivo;
-            
-            if (usuarioEdicao.IdNivel != 3)
-            {
-                usuarioEdicao.IdCliente = null;
-            }
+            usuarioEdicao.IdCliente = selectedClienteId > 0 ? selectedClienteId : null;
             
             if (senhaExpiraUI)
                 usuarioEdicao.ValidadeSenha = validadeSenhaUI;
@@ -477,9 +479,9 @@
 
     private async Task ConfirmarExclusao(Usuario item)
     {
-        if (nivelUsuario == 2 && item.IdNivel == 2)
+        if (nivelUsuario == 2 && item.IdNivel != 3)
         {
-            await JS.InvokeVoidAsync("alert", "Operadores não possuem permissão para excluir outros Operadores.");
+            await JS.InvokeVoidAsync("alert", "Operadores só possuem permissão para excluir usuários Gestores.");
             return;
         }
 
@@ -507,9 +509,9 @@
 
     private async Task HandleSubmit(EditContext editContext)
     {
-        if (nivelUsuario == 2 && usuarioEdicao.IdNivel == 2)
+        if (nivelUsuario == 2 && usuarioEdicao.IdNivel != 3)
         {
-            await JS.InvokeVoidAsync("alert", "Operadores não possuem permissão para habilitar/gerenciar outros Operadores.");
+            await JS.InvokeVoidAsync("alert", "Operadores só possuem permissão para cadastrar/editar usuários Gestores.");
             return;
         }
 

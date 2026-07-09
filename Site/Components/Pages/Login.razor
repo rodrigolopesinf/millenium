@@ -20,7 +20,7 @@
         </div>
 
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true" style="margin-bottom: 20px;">
-            <div class="panel" style="border: none; box-shadow: none; margin: 0;">
+            <div class="panel" style="border: none; box-shadow: none; margin: 0; background-color: transparent !important;">
                 <div class="panel-heading" role="tab" id="headingOne" style="background-color: var(--light-bg); padding: 12px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
                     <h4 class="panel-title" style="margin: 0; font-weight: 700; color: var(--dark-bg); font-family: 'Outfit', sans-serif; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
                         <i class="fa fa-sign-in"></i> Acesso ao Sistema
@@ -32,28 +32,28 @@
                         <form action="/api/auth/login" method="post">
                             <AntiforgeryToken />
                             <div class="form-group" style="margin-bottom: 15px;">
-                                <label for="Login" style="font-weight: 600; font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px;">
+                                <label for="Login" style="font-weight: 600; font-size: 13px; color: #475569 !important; display: block; margin-bottom: 6px;">
                                     <i class="fa fa-user"></i>&nbsp;Usuário
                                 </label>
-                                <input type="text" id="Login" name="username" class="form-control" placeholder="Insira seu usuário" maxlength="50" required style="height: 42px; border-radius: var(--radius-md); border-color: var(--border-color);" />
+                                <input type="text" id="Login" name="username" class="form-control" placeholder="Insira seu usuário" maxlength="50" required style="height: 42px; border-radius: var(--radius-md); border-color: #cbd5e1 !important; background-color: #f8fafc !important; color: #1e293b !important;" />
                             </div>
                             
                             <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="Senha" style="font-weight: 600; font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px;">
+                                <label for="Senha" style="font-weight: 600; font-size: 13px; color: #475569 !important; display: block; margin-bottom: 6px;">
                                     <i class="fa fa-lock"></i>&nbsp;Senha
                                 </label>
-                                <input type="password" id="Senha" name="password" class="form-control" placeholder="Insira sua senha" maxlength="8" required style="height: 42px; border-radius: var(--radius-md); border-color: var(--border-color);" />
+                                <input type="password" id="Senha" name="password" class="form-control" placeholder="Insira sua senha" maxlength="8" required style="height: 42px; border-radius: var(--radius-md); border-color: #cbd5e1 !important; background-color: #f8fafc !important; color: #1e293b !important;" />
                             </div>
                             
                             @if (!string.IsNullOrEmpty(Error))
                             {
-                                <div class="alert alert-danger text-center" style="font-size: 13px; font-weight: 600; border-radius: var(--radius-md); padding: 10px; margin-bottom: 20px;">
+                                <div class="alert alert-danger text-center" style="font-size: 13px; font-weight: 600; border-radius: var(--radius-md); padding: 10px; margin-bottom: 20px; background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5 !important;">
                                     @ObterMensagemErro()
                                 </div>
                             }
 
-                            <div class="form-group" style="margin-top: 25px;">
-                                <button type="submit" class="bg-orange" style="height: 44px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; font-family: 'Outfit', sans-serif; background-color: var(--primary-color); border-color: var(--primary-color); width: 100%;">
+                            <div class="form-group" style="margin-top: 25px; text-align: center;">
+                                <button type="submit" class="bg-orange" style="height: 44px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; font-family: 'Outfit', sans-serif; background-color: #f37021 !important; border-color: #f37021 !important; width: 100%; color: #ffffff !important;">
                                     Entrar
                                 </button>
                             </div>

@@ -5,7 +5,7 @@
 @inject ITipoSolicitacaoAppService TipoSolicitacaoApp
 @inject IEnderecoAppService EnderecoApp
 @inject IUsuarioAppService UsuarioApp
-@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JS
 @using Millenium.Domain.Entity
 @using Millenium.Infra.Data.Email
@@ -323,11 +323,29 @@
         try
         {
             // Obter usuário logado para aplicar permissões
-            var userName = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
-            if (!string.IsNullOrEmpty(userName))
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (user?.Identity?.IsAuthenticated == true)
             {
-                usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(userName);
-                nivelUsuario = usuarioLogado?.IdNivel ?? 0;
+                if (user.IsInRole("GESTOR"))
+                {
+                    nivelUsuario = 3;
+                }
+                else if (user.IsInRole("OPERADOR"))
+                {
+                    nivelUsuario = 2;
+                }
+                else if (user.IsInRole("SUPER ADMINISTRADOR"))
+                {
+                    nivelUsuario = 1;
+                }
+                else
+                {
+                    var usr = UsuarioApp.ObterUsuarioPeloNome(user.Identity.Name);
+                    nivelUsuario = usr?.IdNivel ?? 0;
+                }
+
+                usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(user.Identity.Name);
             }
 
             await Task.Run(() =>

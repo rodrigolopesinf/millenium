@@ -4,6 +4,9 @@
 @inject ISolicitacaoAppService SolicitacaoApp
 @inject IClienteAppService ClienteApp
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUsuarioAppService UsuarioApp
 
 <PageTitle>Dashboard - Millenium Pesquisas</PageTitle>
 
@@ -213,6 +216,16 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user?.Identity?.IsAuthenticated == true)
+        {
+            if (user.IsInRole("GESTOR"))
+            {
+                NavigationManager.NavigateTo("/Blazor/Solicitacao");
+                return;
+            }
+        }
         await CarregarDadosAsync();
     }
 

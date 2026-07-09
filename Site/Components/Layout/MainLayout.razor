@@ -1,5 +1,5 @@
 @inherits LayoutComponentBase
-@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUsuarioAppService UsuarioApp
 
 <HeadContent>
@@ -74,14 +74,17 @@
 
                 <!-- Menu de Navegação Vertical -->
                 <ul class="sidebar-menu">
-                    <!-- Seção ADMINISTRAÇÃO -->
-                    <li class="menu-section-header-custom">Administração</li>
-                    <li class="@(isActive("/Blazor/Dashboard") ? "active" : "")">
-                        <a href="/Blazor/Dashboard">
-                            <i class="fa fa-dashboard" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
+                    @if (nivelUsuario != 3)
+                    {
+                        <!-- Seção ADMINISTRAÇÃO -->
+                        <li class="menu-section-header-custom">Administração</li>
+                        <li class="@(isActive("/Blazor/Dashboard") ? "active" : "")">
+                            <a href="/Blazor/Dashboard">
+                                <i class="fa fa-dashboard" style="margin-right: 8px; font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                    }
 
                     @if (nivelUsuario != 3)
                     {
@@ -232,17 +235,34 @@
     private bool cadastroMenuOpen = false;
     private bool mobileMenuOpen = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         try
         {
-            var user = HttpContextAccessor.HttpContext?.User;
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            
             if (user?.Identity?.IsAuthenticated == true)
             {
                 usuarioNome = user.Identity.Name?.ToUpper() ?? "ADMINISTRADOR";
                 
-                var usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(user.Identity.Name);
-                nivelUsuario = usuarioLogado?.IdNivel ?? 0;
+                if (user.IsInRole("GESTOR"))
+                {
+                    nivelUsuario = 3;
+                }
+                else if (user.IsInRole("OPERADOR"))
+                {
+                    nivelUsuario = 2;
+                }
+                else if (user.IsInRole("SUPER ADMINISTRADOR"))
+                {
+                    nivelUsuario = 1;
+                }
+                else
+                {
+                    var usuarioLogado = UsuarioApp.ObterUsuarioPeloNome(user.Identity.Name);
+                    nivelUsuario = usuarioLogado?.IdNivel ?? 0;
+                }
 
                 if (!string.IsNullOrEmpty(usuarioNome))
                 {
