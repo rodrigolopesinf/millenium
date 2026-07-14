@@ -1,4 +1,4 @@
-﻿using Millenium.Domain.Entity;
+using Millenium.Domain.Entity;
 using Millenium.Domain.Interfaces.Repositories;
 using Millenium.Domain.Interfaces.Services;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace Millenium.Domain.Services
 
         public IEnumerable<Solicitacao> ObterSolicitacoesAtivas(IEnumerable<Solicitacao> solicitacoes)
         {
-            return solicitacoes.Where(s => s.Excluido == null);
+            return solicitacoes.Where(s => s.Excluido == null || s.Excluido == false);
         }
     }
 }

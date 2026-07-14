@@ -170,7 +170,7 @@
                     <div class="form-group col-md-6" style="margin-bottom: 15px; display: flex; align-items: flex-end; gap: 8px;">
                         <div style="flex-grow: 1;">
                             <label style="font-weight: 600; font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px;">Senha</label>
-                            <input type="password" @bind="senhaUI" class="form-control" placeholder="SENHA" required="@(usuarioEdicao.IdUsuario == 0)" style="height: 42px; border-radius: var(--radius-md); border-color: var(--border-color);" />
+                            <input type="password" @bind="senhaUI" class="form-control" placeholder="SENHA" maxlength="20" required="@(usuarioEdicao.IdUsuario == 0)" style="height: 42px; border-radius: var(--radius-md); border-color: var(--border-color);" />
                         </div>
                         @if (usuarioEdicao.IdUsuario > 0)
                         {

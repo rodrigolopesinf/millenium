@@ -96,7 +96,7 @@
             </HeaderTemplate>
             <RowTemplate Context="item">
                 <td style="padding: 14px 16px; font-weight: 600; color: var(--primary-color);">@item.IdSolicitacao</td>
-                <td style="padding: 14px 16px;">@(item.Cliente != null ? item.Cliente.Nome : "")</td>
+                <td style="padding: 14px 16px;">@(item.Cliente != null ? (!string.IsNullOrEmpty(item.Cliente.NomeFantasia) ? item.Cliente.NomeFantasia : item.Cliente.Nome) : "")</td>
                 <td style="padding: 14px 16px; font-weight: 500; color: var(--dark-bg);">@item.Nome</td>
                 <td style="padding: 14px 16px;">@item.Cpf</td>
                 <td style="text-align: center; padding: 14px 16px;">
@@ -249,17 +249,20 @@
                     </div>
                 </div>
 
-                <!-- Seção de Parecer da Pesquisa -->
-                <div style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 20px; margin-bottom: 20px; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
-                    <i class="fa fa-commenting-o"></i> Resposta da Pesquisa (Parecer)
-                </div>
-
-                <div class="row">
-                    <div class="form-group col-md-12">
-                        <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Parecer Social</label>
-                        <textarea class="form-control" @bind="solicitacaoEdicao.Resposta" disabled="@(!canEditResposta)" style="height: 120px; border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" placeholder="DIGITE AQUI A RESPOSTA OU PARECER DA PESQUISA..."></textarea>
+                @if (solicitacaoEdicao.IdSolicitacao > 0)
+                {
+                    <!-- Seção de Parecer da Pesquisa -->
+                    <div style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 20px; margin-bottom: 20px; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-commenting-o"></i> Resposta da Pesquisa (Parecer)
                     </div>
-                </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label style="font-weight: 600; font-size: 13px; color: var(--text-muted);">Parecer Social</label>
+                            <textarea class="form-control" @bind="solicitacaoEdicao.Resposta" disabled="@(!canEditResposta)" maxlength="5000" style="height: 220px; border-radius: var(--radius-md); border-color: var(--border-color); text-transform: uppercase;" placeholder="DIGITE AQUI A RESPOSTA OU PARECER DA PESQUISA (MÁXIMO 5000 CARACTERES)..."></textarea>
+                        </div>
+                    </div>
+                }
             </div>
 
             <!-- Footer do Form -->
@@ -433,7 +436,8 @@
             NomePai = "",
             Local = "",
             Cpf = "",
-            Rg = ""
+            Rg = "",
+            NumeroSequencial = "TEMP"
         };
         enderecoEdicao = new Endereco
         {
@@ -544,16 +548,29 @@
                     
                     solicitacaoEdicao.DataHoraCriacao = DateTime.Now;
                     solicitacaoEdicao.IdUsuarioCriacao = usuarioLogado?.IdUsuario ?? 1;
-                    solicitacaoEdicao.Excluido = false;
+                    solicitacaoEdicao.Excluido = null;
 
                     // Gerar sequencial
                     GerarNumeroSequencial(solicitacaoEdicao);
 
+                    // Ensure Endereco identity is not explicitly set so SQL Server can generate it
+                    if (solicitacaoEdicao.Endereco != null)
+                    {
+                        solicitacaoEdicao.Endereco.IdEndereco = 0;
+                    }
+
                     SolicitacaoApp.Add(solicitacaoEdicao);
                     
                     // Envia email de notificação (Igual ao MVC)
-                    string mensagem = " <br/> O cliente " + solicitacaoEdicao.Cliente?.NomeFantasia + " gerou a solicitação de número " + solicitacaoEdicao.NumeroSequencial;
-                    new Email(solicitacaoEdicao, "consulta@millenium.com.br", "Nova solicitação do cliente", mensagem);
+                    try
+                    {
+                        string mensagem = " <br/> O cliente " + solicitacaoEdicao.Cliente?.NomeFantasia + " gerou a solicitação de número " + solicitacaoEdicao.NumeroSequencial;
+                        new Email(solicitacaoEdicao, "consulta@millenium.com.br", "Nova solicitação do cliente", mensagem);
+                    }
+                    catch
+                    {
+                        // Silencia falha de envio de e-mail local para não impedir o salvamento da solicitação
+                    }
                 }
                 else
                 {
@@ -605,11 +622,18 @@
                         // Se a resposta foi salva e concluída por um gestor, envia email
                         if (canEditResposta && !string.IsNullOrEmpty(existente.Resposta))
                         {
-                            string msgConcluido = " <br/> Sua solicitação está concluída, acesse https://www.milleniumpesquisas.com.br/ para visualizar a resposta. ";
-                            var clienteObj = ClienteApp.GetById(existente.IdCliente ?? 0);
-                            if (clienteObj != null && !string.IsNullOrEmpty(clienteObj.EmailPrincipal))
+                            try
                             {
-                                new Email(existente, clienteObj.EmailPrincipal, "Resposta de solicitação de pesquisa", msgConcluido);
+                                string msgConcluido = " <br/> Sua solicitação está concluída, acesse https://www.milleniumpesquisas.com.br/ para visualizar a resposta. ";
+                                var clienteObj = ClienteApp.GetById(existente.IdCliente ?? 0);
+                                if (clienteObj != null && !string.IsNullOrEmpty(clienteObj.EmailPrincipal))
+                                {
+                                    new Email(existente, clienteObj.EmailPrincipal, "Resposta de solicitação de pesquisa", msgConcluido);
+                                }
+                            }
+                            catch
+                            {
+                                // Silencia falha de envio de e-mail local para não impedir a finalização da solicitação
                             }
                         }
                     }
