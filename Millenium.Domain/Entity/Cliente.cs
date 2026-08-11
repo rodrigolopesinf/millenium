@@ -107,6 +107,8 @@ namespace Millenium.Domain.Entity
 
         public int? DiaVencimento { get; set; }
 
+        public int? UltimoSequencial { get; set; }
+
         public virtual Endereco Endereco { get; set; }
 
         public virtual Contato Contato { get; set; }

@@ -52,21 +52,18 @@ namespace Millenium.Domain.Entity
         [StringLength(15)]
         public string Cpf { get; set; }
 
-        [Required]
         [StringLength(10)]
-        public string Rg { get; set; }
+        public string? Rg { get; set; }
 
-        [Required]
         [StringLength(50)]
-        public string NomePai { get; set; }
+        public string? NomePai { get; set; }
 
         [Required]
         [StringLength(50)]
         public string NomeMae { get; set; }
 
-        [Required]
         [StringLength(50)]
-        public string Local { get; set; }
+        public string? Local { get; set; }
 
         [StringLength(5000)]
         public string? Resposta { get; set; }

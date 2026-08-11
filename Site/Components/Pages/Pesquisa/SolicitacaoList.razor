@@ -194,7 +194,7 @@
                     </div>
 
                     <div class="form-group col-md-6">
-                        <MilleniumInput Label="Local de Nascimento" @bind-Value="solicitacaoEdicao.Local" Placeholder="CIDADE - UF" Required="true" Disabled="@isReadOnly" />
+                        <MilleniumInput Label="Local de Nascimento" @bind-Value="solicitacaoEdicao.Local" Placeholder="CIDADE - UF" Required="false" Disabled="@isReadOnly" />
                     </div>
 
                     <div class="form-group col-md-6">
@@ -202,11 +202,11 @@
                     </div>
 
                     <div class="form-group col-md-6">
-                        <MilleniumInput Label="RG" @bind-Value="solicitacaoEdicao.Rg" Placeholder="SOMENTE NÚMEROS" Required="true" Disabled="@isReadOnly" Maxlength="9" />
+                        <MilleniumInput Label="RG" @bind-Value="solicitacaoEdicao.Rg" Placeholder="SOMENTE NÚMEROS" Required="false" Disabled="@isReadOnly" Maxlength="9" />
                     </div>
 
                     <div class="form-group col-md-6">
-                        <MilleniumInput Label="Nome do Pai" @bind-Value="solicitacaoEdicao.NomePai" Placeholder="NOME COMPLETO DO PAI" Required="true" Disabled="@isReadOnly" />
+                        <MilleniumInput Label="Nome do Pai" @bind-Value="solicitacaoEdicao.NomePai" Placeholder="NOME COMPLETO DO PAI" Required="false" Disabled="@isReadOnly" />
                     </div>
 
                     <div class="form-group col-md-6">
@@ -541,8 +541,8 @@
 
                     solicitacaoEdicao.Nome = solicitacaoEdicao.Nome.ToUpper().Trim();
                     solicitacaoEdicao.NomeMae = solicitacaoEdicao.NomeMae.ToUpper().Trim();
-                    solicitacaoEdicao.NomePai = solicitacaoEdicao.NomePai.ToUpper().Trim();
-                    solicitacaoEdicao.Local = solicitacaoEdicao.Local.ToUpper().Trim();
+                    solicitacaoEdicao.NomePai = solicitacaoEdicao.NomePai?.ToUpper().Trim();
+                    solicitacaoEdicao.Local = solicitacaoEdicao.Local?.ToUpper().Trim();
                     solicitacaoEdicao.Cpf = solicitacaoEdicao.Cpf?.Trim();
                     solicitacaoEdicao.Rg = solicitacaoEdicao.Rg?.Trim();
                     
@@ -602,8 +602,8 @@
                         {
                             existente.Nome = solicitacaoEdicao.Nome.ToUpper().Trim();
                             existente.NomeMae = solicitacaoEdicao.NomeMae.ToUpper().Trim();
-                            existente.NomePai = solicitacaoEdicao.NomePai.ToUpper().Trim();
-                            existente.Local = solicitacaoEdicao.Local.ToUpper().Trim();
+                            existente.NomePai = solicitacaoEdicao.NomePai?.ToUpper().Trim();
+                            existente.Local = solicitacaoEdicao.Local?.ToUpper().Trim();
                             existente.Cpf = solicitacaoEdicao.Cpf?.Trim();
                             existente.Rg = solicitacaoEdicao.Rg?.Trim();
                             existente.DataNascimento = solicitacaoEdicao.DataNascimento;
@@ -661,10 +661,20 @@
         obj.Sequencia = GetSequencial(obj.Ano, idCliente);
 
         obj.NumeroSequencial = obj.Cliente.CodigoCliente + " - " + obj.Sequencia + "/" + obj.Ano;
+
+        // Se a sequência inicial configurada foi consumida, limpar do cadastro do cliente
+        if (obj.Cliente != null && obj.Cliente.UltimoSequencial.HasValue && obj.Cliente.UltimoSequencial.Value > 0)
+        {
+            obj.Cliente.UltimoSequencial = null;
+            ClienteApp.Update(obj.Cliente);
+        }
     }
 
     private int GetSequencial(int ano, int idCliente)
     {
+        var cliente = ClienteApp.GetById(idCliente);
+        var sequenciaInicial = cliente?.UltimoSequencial ?? 0;
+
         var sequencia = 1;
         var codSequencial = SolicitacaoApp.GetAll()
             ?.LastOrDefault(x => x.IdCliente == idCliente);
@@ -672,7 +682,12 @@
         if (codSequencial != null)
         {
             if (!(ano > codSequencial.Ano))
-                sequencia = codSequencial.Sequencia + sequencia;
+                sequencia = codSequencial.Sequencia + 1;
+        }
+
+        if (sequenciaInicial > 0 && sequenciaInicial >= sequencia)
+        {
+            sequencia = sequenciaInicial + 1;
         }
 
         return sequencia;

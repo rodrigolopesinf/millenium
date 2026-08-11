@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[Solicitacao] (
+CREATE TABLE [dbo].[Solicitacao] (
     [IdSolicitacao]      INT          IDENTITY (1, 1) NOT NULL,
     [IdCliente]          INT          NULL,
     [IdUsuarioCriacao]   INT          NULL,
@@ -11,8 +11,8 @@
     [Nome]               VARCHAR (50) NOT NULL,
     [DataNascimento]     DATETIME     NOT NULL,
     [Cpf]                VARCHAR (15) NOT NULL,
-    [Rg]                 VARCHAR (10) NOT NULL,
-    [NomePai]            VARCHAR (50) NOT NULL,
+    [Rg]                 VARCHAR (10) NULL,
+    [NomePai]            VARCHAR (50) NULL,
     [NomeMae]            VARCHAR (50) NOT NULL,
     [IdTipoSolicitacao]  INT          NOT NULL,
     [IdEndereco]         INT          NULL,
