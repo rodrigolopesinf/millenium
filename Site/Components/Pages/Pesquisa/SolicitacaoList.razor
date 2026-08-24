@@ -682,7 +682,20 @@
         if (codSequencial != null)
         {
             if (!(ano > codSequencial.Ano))
+            {
                 sequencia = codSequencial.Sequencia + 1;
+            }
+            else
+            {
+                // Se mudou de ano em relação à última solicitação, o sequencial inicial legado
+                // configurado no cadastro do cliente expira e deve ser limpo.
+                if (cliente != null && cliente.UltimoSequencial.HasValue)
+                {
+                    cliente.UltimoSequencial = null;
+                    ClienteApp.Update(cliente);
+                    sequenciaInicial = 0;
+                }
+            }
         }
 
         if (sequenciaInicial > 0 && sequenciaInicial >= sequencia)

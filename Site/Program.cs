@@ -100,6 +100,32 @@ builder.Services.AddScoped<IMenuUsuarioRepository, MenuUsuarioRepository>();
 
 var app = builder.Build();
 
+// Rotina de zeramento anual de sequenciais de clientes (todo dia 01/01)
+try
+{
+    var zeramentoPath = Path.Combine(app.Environment.ContentRootPath, "ultimo_zeramento.txt");
+    int anoAtual = DateTime.Now.Year;
+    int ultimoAnoZerado = 0;
+    if (File.Exists(zeramentoPath))
+    {
+        int.TryParse(File.ReadAllText(zeramentoPath), out ultimoAnoZerado);
+    }
+
+    if (anoAtual > ultimoAnoZerado)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ContextMillenium>();
+            dbContext.Database.ExecuteSqlRaw("UPDATE Cliente SET UltimoSequencial = NULL");
+        }
+        File.WriteAllText(zeramentoPath, anoAtual.ToString());
+    }
+}
+catch (Exception)
+{
+    // Silencia falhas para não impedir a inicialização da aplicação
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");

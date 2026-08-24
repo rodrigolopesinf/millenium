@@ -256,7 +256,7 @@
             await Task.Run(() =>
             {
                 var solicitacoes = SolicitacaoApp.GetAll()?.Where(x => x.Excluido != true).ToList() ?? new List<Millenium.Domain.Entity.Solicitacao>();
-                var clientes = ClienteApp.GetAll()?.ToList() ?? new List<Millenium.Domain.Entity.Cliente>();
+                var clientes = ClienteApp.GetAll()?.Where(x => x.Excluido != true && x.Ativo == true).ToList() ?? new List<Millenium.Domain.Entity.Cliente>();
 
                 var total = solicitacoes.Count;
                 var pendentes = solicitacoes.Count(s => string.IsNullOrEmpty(s.Resposta));
